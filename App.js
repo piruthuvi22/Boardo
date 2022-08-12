@@ -23,9 +23,11 @@ import Home from "./screens/Home";
 import Browse from "./screens/Browse";
 import WishList from "./screens/WishList";
 import Profile from "./screens/Profile";
+import Map from "./screens/Map";
 
 // ===============Imports Icons==============
 import { AntDesign, Ionicons } from "@expo/vector-icons";
+import { TouchableOpacity } from "react-native";
 
 export default App = () => {
   const [isUser, setIsUser] = useState(true);
@@ -40,13 +42,14 @@ export default App = () => {
     return (
       <NativeBaseProvider>
         <SafeAreaProvider>
-          <StatusBar />
+          <StatusBar networkActivityIndicatorVisible={false} />
           <NavigationContainer>
-            <Tab.Navigator>
+            <Tab.Navigator screenOptions={{ tabBarHideOnKeyboard: true }}>
               <Tab.Screen
                 name="Home"
                 component={Home}
                 options={{
+                  // tabBarActiveBackgroundColor: "#FD685F",
                   headerShown: false,
                   tabBarStyle: { backgroundColor: "#FD683D", height: 60 },
                   tabBarIcon: () => (
@@ -67,6 +70,7 @@ export default App = () => {
                   tabBarIcon: () => (
                     <AntDesign name="search1" size={24} color="white" />
                   ),
+                  tabBarItemStyle: { marginBottom: 2 },
                   tabBarLabel: "Browse",
                   tabBarLabelStyle: { color: "white", fontSize: 14 },
                 }}
@@ -85,7 +89,12 @@ export default App = () => {
                       color="white"
                     />
                   ),
-                  tabBarItemStyle: { marginBottom: 2 },
+                  tabBarItemStyle: {
+                    marginBottom: 2,
+                    borderBottomWidth: 2,
+                    borderBottomColor: "#fff",
+                    borderRadius: 10,
+                  },
                   tabBarLabel: "WishList",
                   tabBarLabelStyle: { color: "white", fontSize: 14 },
                 }}
@@ -103,6 +112,18 @@ export default App = () => {
                   tabBarItemStyle: { marginBottom: 2 },
                   tabBarLabel: "Account",
                   tabBarLabelStyle: { color: "white", fontSize: 14 },
+                }}
+              />
+              <Tab.Screen
+                name="MapView"
+                component={Map}
+                options={{
+                  headerShown: false,
+                  tabBarStyle: {
+                    display: "none",
+                  },
+
+                  tabBarItemStyle: { marginBottom: 2, display: "none" },
                 }}
               />
             </Tab.Navigator>

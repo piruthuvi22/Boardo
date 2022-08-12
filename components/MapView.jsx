@@ -51,6 +51,7 @@ export default MapView = () => {
         style={styles.map}
         provider={PROVIDER_GOOGLE}
         initialRegion={initialPosition}
+        showsCompass={true}
       >
         {origin.hasOwnProperty("latitude") ? (
           <Marker coordinate={origin} />

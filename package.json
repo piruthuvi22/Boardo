@@ -10,6 +10,7 @@
     "eject": "expo eject"
   },
   "dependencies": {
+    "@googlemaps/google-maps-services-js": "^3.3.16",
     "@react-navigation/bottom-tabs": "^6.3.2",
     "@react-navigation/drawer": "^6.4.3",
     "@react-navigation/native": "^6.0.11",
