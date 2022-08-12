@@ -1,37 +1,78 @@
 import React, { useState, useEffect, useRef } from "react";
 import { StyleSheet, Dimensions } from "react-native";
+import * as Location from "expo-location";
 import {
   Box,
   Text,
   HStack,
   Pressable,
-  VStack,
-  FormControl,
-  Input,
   ScrollView,
   Fab,
   Icon,
 } from "native-base";
-import MapView, { Marker, PROVIDER_GOOGLE } from "react-native-maps";
-import MapViewDirections from "react-native-maps-directions";
 import Constants from "expo-constants";
-const { width, height } = Dimensions.get("window");
 import { Client } from "@googlemaps/google-maps-services-js";
 import BrowseCard from "../components/BrowseCard";
 import AutoComplete from "../components/AutoComplete";
 
 import { Feather, Entypo } from "@expo/vector-icons";
+const client = new Client({});
 
 const Map = ({ navigation }) => {
+  const [location, setLocation] = useState(null);
+  const [errorMsg, setErrorMsg] = useState(null);
+  const [uniName, setUniName] = useState("");
   const [uniLocation, setUniLocation] = useState({});
+
+  useEffect(() => {
+    (async () => {
+      let { status } = await Location.requestForegroundPermissionsAsync();
+      if (status !== "granted") {
+        setErrorMsg("Permission to access location was denied");
+        return;
+      }
+
+      let location = await Location.getCurrentPositionAsync({});
+      setLocation({
+        latitude: location?.coords.latitude,
+        longitude: location?.coords.longitude,
+      });
+      let lantlong = {
+        latitude: location?.coords.latitude,
+        longitude: location?.coords.longitude,
+      };
+      client
+        .reverseGeocode({
+          params: {
+            key: "AIzaSyC7UEErM9uNLXfGOviKE5FOymLpMNcvpyI",
+            latlng: lantlong,
+          },
+        })
+        .then((r) => {
+          console.log(r.data.results[0]?.formatted_address.split(",")[0]);
+          setUniName(r.data?.results[0]?.formatted_address);
+        })
+        .catch((e) => {
+          console.log(e);
+        });
+    })();
+  }, []);
+
+  let text = "Waiting..";
+  if (errorMsg) {
+    text = errorMsg;
+  } else if (location) {
+    text = JSON.stringify(location);
+  }
+
   const handlePlaceSelected = (details) => {
-    // fetch("");
     const position = {
       latitude: details?.geometry.location.lat || 0,
       longitude: details?.geometry.location.lng || 0,
     };
     setUniLocation(position);
-    console.log("Position==", position);
+    setUniName(details?.name);
+    console.log("Place ==", details.name);
   };
 
   return (
@@ -43,7 +84,7 @@ const Map = ({ navigation }) => {
         justifyContent={"space-between"}
       >
         <Text style={styles.head}>Current Location </Text>
-        <Text style={styles.currentLocation}>Moratuwa </Text>
+        <Text style={styles.currentLocation}>{uniName} </Text>
         <Pressable
           android_ripple={{ color: "#ccc", borderless: true, radius: 20 }}
           onPress={() => navigation.navigate("Browse")}
@@ -91,7 +132,16 @@ const styles = StyleSheet.create({
     top: Constants.statusBarHeight,
     backgroundColor: "#eee",
   },
-
+  head: {
+    fontFamily: "Poppins-Regular",
+    fontSize: 16,
+    color: "#5C5A6F",
+  },
+  currentLocation: {
+    fontFamily: "Poppins-Medium",
+    fontSize: 13,
+    color: "#A0A0A0",
+  },
   fab: {
     position: "absolute",
     bottom: 100,
