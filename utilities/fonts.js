@@ -9,7 +9,8 @@ const importFont = () => {
     "Poppins-Medium": require("../assets/fonts/Poppins-Medium.ttf"),
     "Poppins-Regular": require("../assets/fonts/Poppins-Regular.ttf"),
     "Poppins-Light": require("../assets/fonts/Poppins-Light.ttf"),
-    "Poppins-ExtraLight": require("../assets/fonts//Poppins-ExtraLight.ttf"),
+    "Poppins-ExtraLight": require("../assets/fonts/Poppins-ExtraLight.ttf"),
+    "Poppins-Thin": require("../assets/fonts/Poppins-Thin.ttf"),
   });
   return loaded;
 };

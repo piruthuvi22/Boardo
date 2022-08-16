@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import "react-native-gesture-handler";
 import { StatusBar } from "expo-status-bar";
 import { SafeAreaProvider } from "react-native-safe-area-context";
-import { NativeBaseProvider, Text } from "native-base";
+import { Button, NativeBaseProvider, Pressable, Text } from "native-base";
 import { NavigationContainer } from "@react-navigation/native";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { createStackNavigator } from "@react-navigation/stack";
@@ -24,6 +24,7 @@ import Browse from "./screens/Browse";
 import WishList from "./screens/WishList";
 import Profile from "./screens/Profile";
 import Map from "./screens/Map";
+import Details from "./screens/Details";
 
 // ===============Imports Icons==============
 import { AntDesign, Ionicons } from "@expo/vector-icons";
@@ -44,7 +45,10 @@ export default App = () => {
         <SafeAreaProvider>
           <StatusBar networkActivityIndicatorVisible={false} />
           <NavigationContainer>
-            <Tab.Navigator screenOptions={{ tabBarHideOnKeyboard: true }}>
+            <Tab.Navigator
+              screenOptions={{ tabBarHideOnKeyboard: true }}
+              initialRouteName="Details"
+            >
               <Tab.Screen
                 name="Home"
                 component={Home}
@@ -122,9 +126,31 @@ export default App = () => {
                   tabBarStyle: {
                     display: "none",
                   },
-
                   tabBarItemStyle: { marginBottom: 2, display: "none" },
                 }}
+              />
+              <Tab.Screen
+                name="Details"
+                component={Details}
+                options={({ route, navigation }) => ({
+                  headerTitleStyle: { color: "#fff" },
+                  headerLeft: () => {
+                    return (
+                      <Ionicons
+                        name="chevron-back-outline"
+                        size={24}
+                        color="#fff"
+                        onPress={() => navigation.navigate("Browse")}
+                      />
+                    );
+                  },
+                  headerStyle: { backgroundColor: "#FF754E" },
+                  title: route.params?.name || "Details",
+                  tabBarStyle: {
+                    display: "none",
+                  },
+                  tabBarItemStyle: { marginBottom: 2, display: "none" },
+                })}
               />
             </Tab.Navigator>
           </NavigationContainer>

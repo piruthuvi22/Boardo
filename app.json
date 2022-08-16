@@ -23,7 +23,9 @@
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/splash.png",
         "backgroundColor": "#FFFFFF"
-      }
+      },
+      "versionCode": 1,
+      "package": "com.piruthuvi.boardo"
     },
     "web": {
       "favicon": "./assets/images//splash.png"

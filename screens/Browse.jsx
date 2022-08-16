@@ -1,69 +1,36 @@
 import React, { useState, useEffect, useRef } from "react";
-import { StyleSheet, Dimensions } from "react-native";
+import { StyleSheet, Dimensions, DrawerLayoutAndroid } from "react-native";
 import * as Location from "expo-location";
 import {
   Box,
-  Text,
   HStack,
   Pressable,
   ScrollView,
   Fab,
   Icon,
+  Center,
+  Button,
+  SectionList,
+  Heading,
+  Text,
+  Slider,
+  VStack,
+  Checkbox,
+  Radio,
 } from "native-base";
 import Constants from "expo-constants";
 import { Client } from "@googlemaps/google-maps-services-js";
 import BrowseCard from "../components/BrowseCard";
 import AutoComplete from "../components/AutoComplete";
 
-import { Feather, Entypo } from "@expo/vector-icons";
+import { FontAwesome, Entypo } from "@expo/vector-icons";
 const client = new Client({});
 
 const Map = ({ navigation }) => {
-  const [location, setLocation] = useState(null);
-  const [errorMsg, setErrorMsg] = useState(null);
+  const drawer = useRef(null);
+
   const [uniName, setUniName] = useState("");
   const [uniLocation, setUniLocation] = useState({});
-
-  useEffect(() => {
-    (async () => {
-      let { status } = await Location.requestForegroundPermissionsAsync();
-      if (status !== "granted") {
-        setErrorMsg("Permission to access location was denied");
-        return;
-      }
-
-      let location = await Location.getCurrentPositionAsync({});
-      setLocation({
-        latitude: location?.coords.latitude,
-        longitude: location?.coords.longitude,
-      });
-      let lantlong = {
-        latitude: location?.coords.latitude,
-        longitude: location?.coords.longitude,
-      };
-      client
-        .reverseGeocode({
-          params: {
-            key: "AIzaSyC7UEErM9uNLXfGOviKE5FOymLpMNcvpyI",
-            latlng: lantlong,
-          },
-        })
-        .then((r) => {
-          console.log(r.data.results[0]?.formatted_address.split(",")[0]);
-          setUniName(r.data?.results[0]?.formatted_address);
-        })
-        .catch((e) => {
-          console.log(e);
-        });
-    })();
-  }, []);
-
-  let text = "Waiting..";
-  if (errorMsg) {
-    text = errorMsg;
-  } else if (location) {
-    text = JSON.stringify(location);
-  }
 
   const handlePlaceSelected = (details) => {
     const position = {
@@ -75,54 +42,310 @@ const Map = ({ navigation }) => {
     console.log("Place ==", details.name);
   };
 
-  return (
-    <Box style={styles.wrapper}>
-      <HStack
-        marginX={3}
-        marginTop={3}
-        alignItems="center"
-        justifyContent={"space-between"}
-      >
-        <Text style={styles.head}>Current Location </Text>
-        <Text style={styles.currentLocation}>{uniName} </Text>
-        <Pressable
-          android_ripple={{ color: "#ccc", borderless: true, radius: 20 }}
-          onPress={() => navigation.navigate("Browse")}
-        >
-          <Feather name="chevron-down" size={24} color="#A0A0A0" />
-        </Pressable>
-      </HStack>
+  const filterSheet = () => {
+    return (
+      <Box height={"full"} w={"full"} pt={Constants.statusBarHeight} px={2}>
+        <ScrollView showsVerticalScrollIndicator={false}>
+          <VStack mx={2} mb={3}>
+            <Text style={styles.categoryTitle}>Distance</Text>
+            <Slider
+              w="full"
+              defaultValue={2}
+              minValue={1}
+              maxValue={5}
+              accessibilityLabel="hello world"
+              step={1}
+            >
+              <Slider.Track>
+                <Slider.FilledTrack />
+              </Slider.Track>
+              <Slider.Thumb />
+            </Slider>
+            <HStack justifyContent={"space-between"}>
+              <Text style={styles.slideVal}>{"<100m"}</Text>
+              <Text style={styles.slideVal}>{"<200m"}</Text>
+              <Text style={styles.slideVal}>{"<500m"}</Text>
+              <Text style={styles.slideVal}>{"<1km"}</Text>
+              <Text style={styles.slideVal}>{">1km"}</Text>
+            </HStack>
+          </VStack>
 
-      <Box m={2}>
-        <Box style={styles.searchContainer}>
-          <AutoComplete
-            label={"University"}
-            onPlaceSelected={(details) => handlePlaceSelected(details)}
+          <VStack mx={2} mb={3}>
+            <Text style={styles.categoryTitle}>Room type</Text>
+            <Checkbox.Group
+              defaultValue={["A", "B"]}
+              accessibilityLabel="pick an item"
+              onChange={(values) => {}}
+            >
+              <Checkbox
+                value="single"
+                my="0.5"
+                _text={{ style: styles.filterValues }}
+              >
+                Single
+              </Checkbox>
+              <Checkbox
+                value="shared"
+                my="0.5"
+                _text={{ style: styles.filterValues }}
+              >
+                Shared
+              </Checkbox>
+              <Checkbox
+                value="house"
+                my="0.5"
+                _text={{ style: styles.filterValues }}
+              >
+                House
+              </Checkbox>
+            </Checkbox.Group>
+          </VStack>
+
+          <VStack mx={2} mb={3}>
+            <Text style={styles.categoryTitle}>Wash room type</Text>
+            <Checkbox.Group
+              // defaultValue={["A", "B"]}
+              accessibilityLabel="pick an item"
+              onChange={(values) => {}}
+            >
+              <Checkbox
+                value="traditional"
+                my="0.5"
+                size={"sm"}
+                _text={{ style: styles.filterValues }}
+              >
+                Traditional
+              </Checkbox>
+              <Checkbox
+                value="western"
+                my="0.5"
+                size={"sm"}
+                _text={{ style: styles.filterValues }}
+              >
+                Western
+              </Checkbox>
+              <Checkbox
+                value="attached"
+                my="0.5"
+                size={"sm"}
+                _text={{ style: styles.filterValues }}
+              >
+                Attached
+              </Checkbox>
+              <Checkbox
+                value="common"
+                my="0.5"
+                size={"sm"}
+                _text={{ style: styles.filterValues }}
+              >
+                Common
+              </Checkbox>
+            </Checkbox.Group>
+          </VStack>
+
+          <VStack mx={2} mb={3}>
+            <Text style={styles.categoryTitle}>Offering meals</Text>
+            <Radio.Group
+              defaultValue={["A", "B"]}
+              accessibilityLabel="pick an item"
+              onChange={(values) => {}}
+            >
+              <Radio
+                value="yes"
+                size={"sm"}
+                my="0.5"
+                _text={{ style: styles.filterValues }}
+              >
+                Yes
+              </Radio>
+              <Radio
+                value="no"
+                size={"sm"}
+                my="0.5"
+                _text={{ style: styles.filterValues }}
+              >
+                No
+              </Radio>
+              <Radio
+                value="both"
+                size={"sm"}
+                my="0.5"
+                _text={{ style: styles.filterValues }}
+              >
+                Both
+              </Radio>
+            </Radio.Group>
+          </VStack>
+
+          <VStack mx={2} mb={3}>
+            <Text style={styles.categoryTitle}>Facilities</Text>
+            <Checkbox.Group
+              // defaultValue={["A", "B"]}
+              accessibilityLabel="pick an item"
+              onChange={(values) => {}}
+            >
+              <Checkbox
+                value="traditional"
+                my="0.5"
+                size={"sm"}
+                _text={{ style: styles.filterValues }}
+              >
+                Furniture
+              </Checkbox>
+              <Checkbox
+                value="western"
+                my="0.5"
+                size={"sm"}
+                _text={{ style: styles.filterValues }}
+              >
+                {"Bed & Mattress"}
+              </Checkbox>
+              <Checkbox
+                value="attached"
+                my="0.5"
+                size={"sm"}
+                _text={{ style: styles.filterValues }}
+              >
+                AC
+              </Checkbox>
+              <Checkbox
+                value="common"
+                my="0.5"
+                size={"sm"}
+                _text={{ style: styles.filterValues }}
+              >
+                Celing fan, Wall fan, Table fan
+              </Checkbox>
+              <Checkbox
+                value="common"
+                my="0.5"
+                size={"sm"}
+                _text={{ style: styles.filterValues }}
+              >
+                Cooking facilities
+              </Checkbox>
+            </Checkbox.Group>
+          </VStack>
+
+          <VStack mx={2} mb={3}>
+            <Text style={styles.categoryTitle}>Payment</Text>
+            <Radio.Group
+              defaultValue={["A", "B"]}
+              accessibilityLabel="pick an item"
+              onChange={(values) => {}}
+            >
+              <Radio
+                value="monthly"
+                size={"sm"}
+                my="0.5"
+                _text={{ style: styles.filterValues }}
+              >
+                Monthly
+              </Radio>
+              <Radio
+                value="no"
+                size={"sm"}
+                my="0.5"
+                _text={{ style: styles.filterValues }}
+              >
+                Contract
+              </Radio>
+            </Radio.Group>
+          </VStack>
+
+          <HStack mx={2} mb={3} justifyContent={"flex-end"}>
+            <Button
+              p={2}
+              title="Close drawer"
+              width={20}
+              _text={{ style: { fontFamily: "Poppins-Medium" } }}
+              onPress={() => drawer.current.closeDrawer()}
+            >
+              Filter
+            </Button>
+          </HStack>
+        </ScrollView>
+        {/* <SectionList
+          // maxW="300"
+          w="100%"
+          // mb="4"
+          sections={data}
+          keyExtractor={(item, index) => item + index}
+          renderItem={({ item }) => (
+            <Center w={"full"} py="4" bg={item}>
+              {item.split(".")[1]}
+            </Center>
+          )}
+          renderSectionHeader={({ section: { title } }) => (
+            <Center w={"full"}>
+              <Heading fontSize="xl" mt="8" pb="4">
+                {title}
+              </Heading>
+            </Center>
+          )}
+        /> */}
+      </Box>
+    );
+  };
+
+  return (
+    <DrawerLayoutAndroid
+      ref={drawer}
+      drawerWidth={300}
+      drawerPosition={"right"}
+      renderNavigationView={filterSheet}
+      drawerBackgroundColor={"rgba(34, 51, 67,0.95)"}
+      drawerLockMode={"locked-closed"}
+    >
+      <Box style={styles.wrapper}>
+        <HStack
+          marginX={3}
+          marginTop={3}
+          alignItems="center"
+          justifyContent={"flex-end"}
+        >
+          <Pressable
+            android_ripple={{ color: "#ccc", borderless: true, radius: 30 }}
+            onPress={() => drawer.current.openDrawer()}
+          >
+            <FontAwesome name="bars" size={24} color="#A0A0A0" />
+          </Pressable>
+        </HStack>
+
+        <Box mx={2}>
+          <Box style={styles.searchContainer}>
+            <AutoComplete
+              label={"University"}
+              onPlaceSelected={(details) => handlePlaceSelected(details)}
+            />
+          </Box>
+        </Box>
+        <ScrollView
+          showsVerticalScrollIndicator={false}
+          style={{ marginTop: 70 }}
+          mx={3}
+        >
+          <BrowseCard navigation={navigation} />
+          <BrowseCard navigation={navigation} />
+          <BrowseCard navigation={navigation} />
+          <BrowseCard navigation={navigation} />
+          <BrowseCard navigation={navigation} />
+          <BrowseCard navigation={navigation} />
+        </ScrollView>
+        <Box style={styles.fab}>
+          <Fab
+            renderInPortal={false}
+            onPress={() => navigation.navigate("MapView")}
+            style={styles.fabBtn}
+            shadow={3}
+            placement=""
+            icon={
+              <Icon color="#FF754E" as={Entypo} name="location" size="19" />
+            }
           />
         </Box>
       </Box>
-      <ScrollView
-        showsVerticalScrollIndicator={false}
-        style={{ marginTop: 70 }}
-      >
-        <BrowseCard />
-        <BrowseCard />
-        <BrowseCard />
-        <BrowseCard />
-        <BrowseCard />
-        <BrowseCard />
-      </ScrollView>
-      <Box style={styles.fab}>
-        <Fab
-          renderInPortal={false}
-          onPress={() => navigation.navigate("MapView")}
-          style={styles.fabBtn}
-          shadow={3}
-          placement=""
-          icon={<Icon color="#FF754E" as={Entypo} name="location" size="19" />}
-        />
-      </Box>
-    </Box>
+    </DrawerLayoutAndroid>
   );
 };
 
@@ -131,6 +354,7 @@ const styles = StyleSheet.create({
     position: "relative",
     top: Constants.statusBarHeight,
     backgroundColor: "#eee",
+    paddingBottom: 60,
   },
   head: {
     fontFamily: "Poppins-Regular",
@@ -144,7 +368,7 @@ const styles = StyleSheet.create({
   },
   fab: {
     position: "absolute",
-    bottom: 100,
+    bottom: 80,
     right: 20,
   },
   fabBtn: {
@@ -169,9 +393,19 @@ const styles = StyleSheet.create({
     padding: 5,
     zIndex: 100,
   },
-  input: {
-    // borderColor: "red",
-    // borderWidth: 2,
+  categoryTitle: {
+    fontSize: 20,
+    color: "#FD683D",
+    fontFamily: "Poppins-Medium",
+  },
+  slideVal: {
+    color: "#737373",
+    fontFamily: "Poppins-Medium",
+  },
+  filterValues: {
+    color: "#fff",
+    fontFamily: "Poppins-Medium",
+    fontSize: 14,
   },
 });
 
