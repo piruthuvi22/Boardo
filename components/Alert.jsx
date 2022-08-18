@@ -1,3 +1,4 @@
+import React from "react";
 import {
   Alert,
   Text,
@@ -6,15 +7,14 @@ import {
   IconButton,
   VStack,
 } from "native-base";
-import React from "react";
 
-const ToastAlert = ({ onSuccessRegister, toast }) => {
+const ToastAlert = ({ onComplete, msg, type, toast }) => {
   return (
     <Alert
       maxWidth="100%"
       alignSelf="center"
       flexDirection="row"
-      status={"warning"}
+      status={type}
       variant={"top-accent"}
     >
       <VStack space={1} flexShrink={1} w="80%">
@@ -30,15 +30,8 @@ const ToastAlert = ({ onSuccessRegister, toast }) => {
               fontWeight="medium"
               flexShrink={1}
               color="darkText"
-              //   color={
-              //     variant === "solid"
-              //       ? "lightText"
-              //       : variant !== "outline"
-              //       ? "darkText"
-              //       : null
-              //   }
             >
-              {"Registration successed!"}
+              {msg}
             </Text>
           </HStack>
           <IconButton
@@ -47,7 +40,7 @@ const ToastAlert = ({ onSuccessRegister, toast }) => {
             _icon={{
               color: "darkText",
             }}
-            onPress={onSuccessRegister}
+            onPress={onComplete}
           />
         </HStack>
       </VStack>

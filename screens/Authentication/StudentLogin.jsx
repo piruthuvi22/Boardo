@@ -17,6 +17,7 @@ import {
   ScrollView,
   KeyboardAvoidingView,
   IconButton,
+  useToast,
 } from "native-base";
 import {
   ImageBackground,
@@ -29,11 +30,14 @@ import { Feather, Ionicons } from "@expo/vector-icons";
 import axios from "axios";
 let { height, width } = Dimensions.get("screen");
 import AuthContext from "../../context";
+import ShowToast from "../../components/core/toast";
 
 const RenterLogin = ({ navigation }) => {
   const [show, setShow] = useState(false);
   const [username, setEmail] = useState("piru");
   const [password, setPassword] = useState("pass");
+
+  const toast = useToast();
 
   const { signIn } = useContext(AuthContext);
 
@@ -45,19 +49,32 @@ const RenterLogin = ({ navigation }) => {
     setPassword(e);
   };
 
+  const handleOnComplete = () => {
+    toast.closeAll();
+    signIn({ username, password });
+  };
+
   const handleStudentLogin = () => {
     let body = { username, password, role: "student" };
-    axios
-      .post("http://192.168.8.139:1000/users/login", body)
-      .then((res) => {
-        console.log(res.data);
-        signIn({ username, password });
-      })
-      .catch((err) => {
-        console.log("==",err);
-        
-      });
+    if (username != "" && password != "") {
+      axios
+        .post("http://192.168.8.139:1000/users/login", body)
+        .then((res) => {
+          console.log(res.data);
+          ShowToast(toast, "warning", "Login success!", () => {
+            toast.closeAll();
+            signIn({ username, password });
+          });
+        })
+        .catch((err) => {
+          console.log(err);
+          ShowToast(toast, "error", "Login failed. Try again!");
+        });
+    } else {
+      ShowToast(toast, "warning", "Invalid params!");
+    }
   };
+
   return (
     <ScrollView>
       <KeyboardAvoidingView h={height} behavior={"a"}>
@@ -196,7 +213,7 @@ const RenterLogin = ({ navigation }) => {
                   borderRadius={100}
                   borderColor={"#FD683D"}
                   borderWidth={2}
-                  disabled={username == "" || password == "" ? true : false}
+                  // disabled={username == "" || password == "" ? true : false}
                   _disabled={{ backgroundColor: "#ddd" }}
                   _text={{
                     fontFamily: "Poppins-Bold",

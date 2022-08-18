@@ -17,6 +17,7 @@ import {
   ScrollView,
   KeyboardAvoidingView,
   IconButton,
+  useToast,
 } from "native-base";
 import {
   ImageBackground,
@@ -26,9 +27,8 @@ import {
 } from "react-native";
 import { Feather, Ionicons } from "@expo/vector-icons";
 import axios from "axios";
-import { useToast } from "native-base";
 import AuthContext from "../../context";
-import ToastAlert from "../../components/Alert";
+import showToast from "../../components/core/toast";
 
 let { height, width } = Dimensions.get("screen");
 
@@ -38,8 +38,9 @@ const RenterLogin = ({ navigation }) => {
   const [password, setPassword] = useState("");
   const [password2, setPassword2] = useState("");
 
-  const { signIn } = useContext(AuthContext);
   const toast = useToast();
+
+  const { signIn } = useContext(AuthContext);
 
   const handleEmail = (e) => {
     setEmail(e);
@@ -53,49 +54,27 @@ const RenterLogin = ({ navigation }) => {
     setPassword2(e);
   };
 
-  const onSuccessRegister = () => {
-    console.log("sss");
-    toast.closeAll();
-    navigation.navigate("student-login");
-  };
-
   const handleRegister = () => {
     let body = { username, password };
-    if (
-      password === password2 &&
-      username != "" &&
-      password != "" &&
-      password2 != ""
-    ) {
-      axios
-        .post("http://192.168.8.139:1000/users/register", body)
-        .then((res) => {
-          console.log(res.data);
-          toast.show({
-        duration: 3000,
-            onCloseComplete: () => navigation.navigate("student-login"),
-            render: ({}) => {
-              return (
-                <ToastAlert
-                  toast={toast}
-                  onSuccessRegister={onSuccessRegister}
-                />
-              );
-            },
+    if (username != "" && password != "" && password2 != "") {
+      if (password === password2) {
+        axios
+          .post("http://192.168.8.139:1000/users/register", body)
+          .then((res) => {
+            console.log(res.data);
+            showToast(toast, "warning", "Registration success", () =>
+              navigation.navigate("student-login")
+            );
+          })
+          .catch((err) => {
+            showToast(toast, "error", "Registration failed");
           });
-        })
-        .catch((err) => console.log(err));
+      } else {
+        showToast(toast, "error", "Password not match");
+      }
     } else {
       console.log("Invalid params");
-      toast.show({
-        duration: 3000,
-        onCloseComplete: () => navigation.navigate("student-login"),
-        render: ({}) => {
-          return (
-            <ToastAlert toast={toast} onSuccessRegister={onSuccessRegister} />
-          );
-        },
-      });
+      showToast(toast, "error", "Invalid credentials!");
     }
   };
   return (
@@ -277,7 +256,7 @@ const RenterLogin = ({ navigation }) => {
                     textAlign: "center",
                   }}
                 >
-                  Login
+                  Register
                 </Button>
                 <Text fontFamily={"Poppins-Medium"} color={"#A0A0A0"} mt={2}>
                   Don't have an account?
