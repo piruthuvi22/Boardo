@@ -21,6 +21,7 @@ import {
 } from "react-native";
 import { SliderBox } from "react-native-image-slider-box";
 import { AntDesign, Ionicons } from "@expo/vector-icons";
+import Comment from "../components/Comment";
 // import ImageSlider from "react-native-image-slider";
 
 const Details = () => {
@@ -31,32 +32,6 @@ const Details = () => {
     "https://www.undp.org/sites/g/files/zskgke326/files/migration/cn/UNDP-CH-Why-Humanity-Must-Save-Nature-To-Save-Itself.jpeg",
   ]);
   const { isOpen, onOpen, onClose } = useDisclose();
-  const data = [
-    {
-      id: "bd7acbea-c1b1-46c2-aed5-3ad53abb28ba",
-    },
-    {
-      id: "3ac68afc-c605-48d3-a4f8-fbd91aa97f63",
-    },
-    {
-      id: "58694a0f-3da1-471f-bd96-145571e29d72",
-    },
-    {
-      id: "58694a0f-3da1-471f-bd96-145571e29d7",
-    },
-    {
-      id: "58694a0f-da1-471f-bd96-145571e29d72",
-    },
-    {
-      id: "5864a0f-3da1-471f-bd96-145571e29d72",
-    },
-    {
-      id: "58694a0fda1-471f-bd96-145571e29d72",
-    },
-  ];
-  const renderItem = ({ item }) => (
-    <Box bg={"amber.800"} m={3} h={10} w={100}></Box>
-  );
   return (
     <Box h={"full"}>
       <HStack
@@ -279,31 +254,3 @@ const styles = StyleSheet.create({
   },
 });
 export default Details;
-
-import { LogBox } from "react-native";
-import Comment from "../components/Comment";
-
-if (__DEV__) {
-  const ignoreWarns = [
-    "EventEmitter.removeListener",
-    "[fuego-swr-keys-from-collection-path]",
-    "Setting a timer for a long period of time",
-    "ViewPropTypes will be removed from React Native",
-    "AsyncStorage has been extracted from react-native",
-    "exported from 'deprecated-react-native-prop-types'.",
-    "Non-serializable values were found in the navigation state.",
-    "VirtualizedLists should never be nested inside plain ScrollViews",
-  ];
-
-  const warn = console.warn;
-  console.warn = (...arg) => {
-    for (const warning of ignoreWarns) {
-      if (arg[0].startsWith(warning)) {
-        return;
-      }
-    }
-    warn(...arg);
-  };
-
-  LogBox.ignoreLogs(ignoreWarns);
-}

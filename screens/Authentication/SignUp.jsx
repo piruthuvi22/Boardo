@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useContext, useState } from "react";
 import {
   Text,
   Center,
@@ -25,18 +25,78 @@ import {
   // ScrollView,
 } from "react-native";
 import { Feather, Ionicons } from "@expo/vector-icons";
+import axios from "axios";
+import { useToast } from "native-base";
+import AuthContext from "../../context";
+import ToastAlert from "../../components/Alert";
 
 let { height, width } = Dimensions.get("screen");
 
 const RenterLogin = ({ navigation }) => {
   const [show, setShow] = useState(false);
+  const [username, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [password2, setPassword2] = useState("");
+
+  const { signIn } = useContext(AuthContext);
+  const toast = useToast();
 
   const handleEmail = (e) => {
-    console.log(e);
+    setEmail(e);
   };
 
   const handlePassword = (e) => {
-    console.log(e);
+    setPassword(e);
+  };
+
+  const handlePassword2 = (e) => {
+    setPassword2(e);
+  };
+
+  const onSuccessRegister = () => {
+    console.log("sss");
+    toast.closeAll();
+    navigation.navigate("student-login");
+  };
+
+  const handleRegister = () => {
+    let body = { username, password };
+    if (
+      password === password2 &&
+      username != "" &&
+      password != "" &&
+      password2 != ""
+    ) {
+      axios
+        .post("http://192.168.8.139:1000/users/register", body)
+        .then((res) => {
+          console.log(res.data);
+          toast.show({
+        duration: 3000,
+            onCloseComplete: () => navigation.navigate("student-login"),
+            render: ({}) => {
+              return (
+                <ToastAlert
+                  toast={toast}
+                  onSuccessRegister={onSuccessRegister}
+                />
+              );
+            },
+          });
+        })
+        .catch((err) => console.log(err));
+    } else {
+      console.log("Invalid params");
+      toast.show({
+        duration: 3000,
+        onCloseComplete: () => navigation.navigate("student-login"),
+        render: ({}) => {
+          return (
+            <ToastAlert toast={toast} onSuccessRegister={onSuccessRegister} />
+          );
+        },
+      });
+    }
   };
   return (
     <ScrollView>
@@ -82,7 +142,7 @@ const RenterLogin = ({ navigation }) => {
               <FormControl isRequired my={2}>
                 <Stack mx="4">
                   <FormControl.Label _text={{ fontFamily: "Poppins-Medium" }}>
-                    Email
+                    Username
                   </FormControl.Label>
                   <Input
                     _focus={{
@@ -92,7 +152,8 @@ const RenterLogin = ({ navigation }) => {
                     }}
                     type="text"
                     defaultValue=""
-                    placeholder="Email Address"
+                    value={username}
+                    placeholder="Username"
                     backgroundColor={"#FD683D:alpha.10"}
                     borderColor={"#FD683D"}
                     focusOutlineColor={"red"}
@@ -133,6 +194,7 @@ const RenterLogin = ({ navigation }) => {
                       />
                     }
                     defaultValue=""
+                    value={password}
                     placeholder="Password"
                     backgroundColor={"#FD683D:alpha.10"}
                     borderColor={"#FD683D"}
@@ -166,13 +228,14 @@ const RenterLogin = ({ navigation }) => {
                       />
                     }
                     defaultValue=""
+                    value={password2}
                     placeholder="Password"
                     backgroundColor={"#FD683D:alpha.10"}
                     borderColor={"#FD683D"}
                     focusOutlineColor={"red"}
                     fontSize={"md"}
                     color={"#666"}
-                    onChangeText={handlePassword}
+                    onChangeText={handlePassword2}
                   />
                   <HStack justifyContent={"space-between"}>
                     <FormControl.HelperText
@@ -200,10 +263,7 @@ const RenterLogin = ({ navigation }) => {
                 <Button
                   android_ripple={{ color: "#F0F1F6" }}
                   backgroundColor="#223343"
-                  onPress={() => {
-                    console.log("Login renter");
-                    navigation.navigate("renter-login");
-                  }}
+                  onPress={handleRegister}
                   width="60%"
                   marginY={1}
                   height={50}

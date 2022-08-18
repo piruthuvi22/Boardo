@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useContext } from "react";
 import {
   Text,
   Center,
@@ -24,19 +24,39 @@ import {
   Dimensions,
   // ScrollView,
 } from "react-native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Feather, Ionicons } from "@expo/vector-icons";
-
+import axios from "axios";
 let { height, width } = Dimensions.get("screen");
+import AuthContext from "../../context";
 
 const RenterLogin = ({ navigation }) => {
   const [show, setShow] = useState(false);
+  const [username, setEmail] = useState("piru");
+  const [password, setPassword] = useState("pass");
+
+  const { signIn } = useContext(AuthContext);
 
   const handleEmail = (e) => {
-    console.log(e);
+    setEmail(e);
   };
 
   const handlePassword = (e) => {
-    console.log(e);
+    setPassword(e);
+  };
+
+  const handleStudentLogin = () => {
+    let body = { username, password, role: "student" };
+    axios
+      .post("http://192.168.8.139:1000/users/login", body)
+      .then((res) => {
+        console.log(res.data);
+        signIn({ username, password });
+      })
+      .catch((err) => {
+        console.log("==",err);
+        
+      });
   };
   return (
     <ScrollView>
@@ -82,7 +102,7 @@ const RenterLogin = ({ navigation }) => {
               <FormControl isRequired my={2}>
                 <Stack mx="4">
                   <FormControl.Label _text={{ fontFamily: "Poppins-Medium" }}>
-                    Email
+                    Username
                   </FormControl.Label>
                   <Input
                     _focus={{
@@ -92,7 +112,8 @@ const RenterLogin = ({ navigation }) => {
                     }}
                     type="text"
                     defaultValue=""
-                    placeholder="Email Address"
+                    value={username}
+                    placeholder="Username"
                     backgroundColor={"#FD683D:alpha.10"}
                     borderColor={"#FD683D"}
                     focusOutlineColor={"red"}
@@ -133,6 +154,7 @@ const RenterLogin = ({ navigation }) => {
                       />
                     }
                     defaultValue=""
+                    value={password}
                     placeholder="Password"
                     backgroundColor={"#FD683D:alpha.10"}
                     borderColor={"#FD683D"}
@@ -165,19 +187,17 @@ const RenterLogin = ({ navigation }) => {
 
               <Center mt={3} justify={"center"} align={"center"} w={"100%"}>
                 <Button
-                  android_ripple={{ color: "#F0F1F6" }}
+                  android_ripple={{ color: "#F0F1F628" }}
                   backgroundColor="#223343"
-                  onPress={() => {
-                    console.log("Login renter");
-                    navigation.navigate("renter-login");
-                  }}
+                  onPress={handleStudentLogin}
                   width="60%"
                   marginY={1}
                   height={50}
                   borderRadius={100}
                   borderColor={"#FD683D"}
                   borderWidth={2}
-                  // fontFamily={"Poppins-Bold"}
+                  disabled={username == "" || password == "" ? true : false}
+                  _disabled={{ backgroundColor: "#ddd" }}
                   _text={{
                     fontFamily: "Poppins-Bold",
                     fontSize: "xl",
