@@ -1,0 +1,78 @@
+[
+  {
+    "PlaceTitle": "PlaceTitle1",
+    "PlaceDescription": "PlaceDescription1",
+    "Image": "Image1",
+    "Rating": "4.2",
+    "Coordinates": {
+      "Latitude": 111,
+      "Longtitude": 222
+    },
+    "Facilities": {
+      "RoomType": "Single | Shared | House",
+      "NoOfBeds": 4,
+      "WashRoomType": ["Traditional", "Western", "Attached", "Common"],
+      "OfferingMeals": true,
+      "Facilities": ["fan", "ac"],
+      "Payment": "Monthly"
+    },
+    "Cost": 6000
+  },
+  {
+    "PlaceTitle": "PlaceTitle12",
+    "PlaceDescription": "PlaceDescription2",
+    "Image": "Image2",
+    "Rating": "4.0",
+    "Coordinates": {
+      "Latitude": 111,
+      "Longtitude": 222
+    },
+    "Facilities": {
+      "RoomType": "Single",
+      "NoOfBeds": 2,
+      "WashRoomType": ["Traditional", "Attached"],
+      "OfferingMeals": false,
+      "Facilities": ["fan", "cookinf"],
+      "Payment": "Monthly"
+    },
+    "Cost": 4500
+  },
+  {
+    "PlaceTitle": "PlaceTitle3",
+    "PlaceDescription": "PlaceDescription3",
+    "Image": "Image3",
+    "Rating": "3.9",
+    "Coordinates": {
+      "Latitude": 111,
+      "Longtitude": 222
+    },
+    "Facilities": {
+      "RoomType": "Shared",
+      "NoOfBeds": 3,
+      "WashRoomType": ["Western", "Attached"],
+      "OfferingMeals": false,
+      "Facilities": ["ac"],
+      "Payment": "Monthly"
+    },
+    "Cost": 4000
+  },
+  {
+    "PlaceTitle": "PlaceTitle4",
+    "PlaceDescription": "PlaceDescription4",
+    "Image": "Image5",
+    "Rating": "3.8",
+    "Coordinates": {
+      "Latitude": 111,
+      "Longtitude": 222
+    },
+    "Facilities": {
+      "RoomType": "House",
+      "NoOfBeds": 10,
+      "WashRoomType": ["Traditional", "Attached"],
+      "OfferingMeals": false,
+      "Facilities": ["fan"],
+      "Payment": "Monthly"
+    },
+    "Cost": 40000
+  }
+]

@@ -1,5 +1,10 @@
 import React, { useState, useEffect, useRef } from "react";
-import { StyleSheet, Dimensions, DrawerLayoutAndroid } from "react-native";
+import {
+  StyleSheet,
+  Dimensions,
+  DrawerLayoutAndroid,
+  Text,
+} from "react-native";
 import * as Location from "expo-location";
 import {
   Box,
@@ -12,7 +17,6 @@ import {
   Button,
   SectionList,
   Heading,
-  Text,
   Slider,
   VStack,
   Checkbox,
@@ -26,19 +30,81 @@ import BrowseCard from "../components/BrowseCard";
 import AutoComplete from "../components/AutoComplete";
 
 import { FontAwesome, Entypo } from "@expo/vector-icons";
+import axios from "axios";
 const client = new Client({});
 
 const Map = ({ navigation }) => {
-  const drawer = useRef(null);
   const [uniName, setUniName] = useState("");
   const [uniLocation, setUniLocation] = useState({});
+  const [places, setPlaces] = useState([]);
 
   const { isOpen, onOpen, onClose } = useDisclose();
 
   useEffect(() => {
-    console.log("Browse.jsx mounted");
+    (async () => {
+      let { status } = await Location.requestForegroundPermissionsAsync();
+      if (status !== "granted") {
+        console.log("Permission to access location was denied");
+        return;
+      }
+      let coordinate = await Location.getCurrentPositionAsync({});
+      setUniLocation({
+        latitude: coordinate?.coords.latitude,
+        longitude: coordinate?.coords.longitude,
+      });
+      let lantlong = {
+        latitude: coordinate?.coords.latitude,
+        longitude: coordinate?.coords.longitude,
+      };
+      client
+        .reverseGeocode({
+          params: {
+            key: "AIzaSyC7UEErM9uNLXfGOviKE5FOymLpMNcvpyI",
+            latlng: lantlong,
+          },
+        })
+        .then((r) => {
+          console.log(r.data.results[0]?.formatted_address.split(",")[0]);
+          setUniName(r.data?.results[0]?.formatted_address);
+        })
+        .catch((e) => {
+          console.log(e);
+        });
+    })();
   }, []);
 
+  useEffect(() => {
+    console.log("Browse.jsx mounted");
+    axios
+      .get("http://192.168.8.139:1000/places/get-places")
+      .then((res) => {
+        // console.log("res.data", res.data);
+        setPlaces(res.data);
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  }, []);
+
+  const passToMaps = () => {
+    if (places.length !== 0) {
+      let placeInfo = [];
+      places.map((place) => {
+        placeInfo.push({
+          latitude: place.Coordinates.Latitude,
+          longitude: place.Coordinates.Longtitude,
+          title: place.PlaceTitle,
+        });
+      });
+      navigation.navigate("MapView", {
+        placeInfo,
+        selectedPlaceCoord: uniLocation.hasOwnProperty("latitude")
+          ? uniLocation
+          : {},
+        selectedPlaceName: uniName,
+      });
+    }
+  };
   const handlePlaceSelected = (details) => {
     const position = {
       latitude: details?.geometry.location.lat || 0,
@@ -46,7 +112,6 @@ const Map = ({ navigation }) => {
     };
     setUniLocation(position);
     setUniName(details?.name);
-    console.log("Place ==", details.name);
   };
 
   const filterSheet = () => {
@@ -78,33 +143,33 @@ const Map = ({ navigation }) => {
 
         <VStack mx={2} mb={3}>
           <Text style={styles.categoryTitle}>Room type</Text>
-          <Checkbox.Group
+          <Radio.Group
             defaultValue={["A", "B"]}
             accessibilityLabel="pick an item"
             onChange={(values) => {}}
           >
-            <Checkbox
+            <Radio
               value="single"
               my="0.5"
               _text={{ style: styles.filterValues }}
             >
               Single
-            </Checkbox>
-            <Checkbox
+            </Radio>
+            <Radio
               value="shared"
               my="0.5"
               _text={{ style: styles.filterValues }}
             >
               Shared
-            </Checkbox>
-            <Checkbox
+            </Radio>
+            <Radio
               value="house"
               my="0.5"
               _text={{ style: styles.filterValues }}
             >
               House
-            </Checkbox>
-          </Checkbox.Group>
+            </Radio>
+          </Radio.Group>
         </VStack>
 
         <VStack mx={2} mb={3}>
@@ -274,14 +339,23 @@ const Map = ({ navigation }) => {
     );
   };
 
+  const renderPlaceCard = () => {
+    return places.map((place) => (
+      <BrowseCard key={place._id} {...place} navigation={navigation} />
+    ));
+  };
+
   return (
     <Box style={styles.wrapper}>
       <HStack
         marginX={3}
         marginTop={3}
         alignItems="center"
-        justifyContent={"flex-end"}
+        justifyContent={"space-between"}
       >
+        <Text style={{ fontFamily: "Poppins-Regular", fontSize: 12 }}>
+          {uniName}
+        </Text>
         <Pressable
           android_ripple={{ color: "#ccc", borderless: true, radius: 30 }}
           onPress={onOpen}
@@ -303,17 +377,12 @@ const Map = ({ navigation }) => {
         style={{ marginTop: 70 }}
         mx={3}
       >
-        <BrowseCard navigation={navigation} />
-        <BrowseCard navigation={navigation} />
-        <BrowseCard navigation={navigation} />
-        <BrowseCard navigation={navigation} />
-        <BrowseCard navigation={navigation} />
-        <BrowseCard navigation={navigation} />
+        {renderPlaceCard()}
       </ScrollView>
       <Box style={styles.fab}>
         <Fab
           renderInPortal={false}
-          onPress={() => navigation.navigate("MapView")}
+          onPress={passToMaps}
           style={styles.fabBtn}
           shadow={3}
           placement="bottom-right"

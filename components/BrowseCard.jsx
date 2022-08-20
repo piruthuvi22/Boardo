@@ -1,20 +1,20 @@
 import React from "react";
-import { TouchableOpacity, StyleSheet } from "react-native";
-import {
-  Box,
-  Text,
-  HStack,
-  Image,
-  Row,
-  Column,
-  Badge,
-  Pressable,
-} from "native-base";
+import { TouchableOpacity, StyleSheet, Text } from "react-native";
+import { Box, HStack, Image, Row, Column, Badge, Pressable } from "native-base";
 import Constants from "expo-constants";
 
-import { FontAwesome } from "@expo/vector-icons";
+import { FontAwesome, MaterialIcons } from "@expo/vector-icons";
 
-const BrowseCard = ({ navigation }) => {
+const BrowseCard = ({
+  navigation,
+  Rating,
+  PlaceTitle,
+  PlaceDescription,
+  ImageUri,
+  Payment,
+  Coordinates,
+  Facilities,
+}) => {
   return (
     <Box style={styles.card} w="full" my={1} borderRadius={3}>
       <Pressable onPress={() => navigation.navigate("Details")}>
@@ -26,7 +26,8 @@ const BrowseCard = ({ navigation }) => {
             >
               <Image
                 source={{
-                  uri: "https://www.travelanddestinations.com/wp-content/uploads/2017/10/hostel-room-pixabay-182965_1280.jpg",
+                  uri:
+                    "https://www.travelanddestinations.com/wp-content/uploads/2017/10/hostel-room-pixabay-182965_1280.jpg",
                 }}
                 alt="room1"
                 h={"full"}
@@ -36,19 +37,30 @@ const BrowseCard = ({ navigation }) => {
           </Box>
           <Row justifyContent={"space-between"} style={{ width: "60%" }} py={2}>
             <Column marginX={1}>
-              <Text style={styles.title}>Place 1</Text>
-              <Text style={styles.desc}>Hello</Text>
+              <Text style={styles.title}>{PlaceTitle}</Text>
+              <Text style={styles.desc}>{Facilities.RoomType}</Text>
+              <Text style={styles.desc}>{PlaceDescription}</Text>
               <Text style={styles.km}>2.1Km 3-6min</Text>
               <HStack alignItems={"center"} justifyContent="space-between">
                 <Row alignItems={"center"}>
-                  <FontAwesome name="bathtub" size={18} color="#aaa" />
-                  <Text style={styles.badge} mx="1">
-                    2
-                  </Text>
-                  <FontAwesome name="bed" size={18} color="#aaa" />
-                  <Text style={styles.badge} mx="1">
-                    3
-                  </Text>
+                  {Facilities.WashRoomType.includes("Attached") && (
+                    <Box pr={2}>
+                      <FontAwesome name="bathtub" size={18} color="#aaa" />
+                    </Box>
+                  )}
+                  {Facilities.OfferingMeals && (
+                    <Box pr={2}>
+                      <MaterialIcons name="restaurant" size={18} color="#aaa" />
+                    </Box>
+                  )}
+                  {Facilities.NoOfBeds ? (
+                    <>
+                      <FontAwesome name="bed" size={18} color="#aaa" />
+                      <Text style={styles.badge}>{Facilities.NoOfBeds}</Text>
+                    </>
+                  ) : (
+                    <Text style={styles.badge}>"</Text>
+                  )}
                 </Row>
               </HStack>
             </Column>
@@ -58,7 +70,7 @@ const BrowseCard = ({ navigation }) => {
                 alignSelf="center"
                 fontFamily={"Poppins-Regular"}
               >
-                4.2
+                {Rating}
               </Badge>
             </Box>
           </Row>
@@ -91,6 +103,7 @@ const styles = StyleSheet.create({
   badge: {
     fontFamily: "Poppins-Regular",
     color: "#aaa",
+    paddingHorizontal: 2,
   },
 });
 

@@ -31,45 +31,47 @@ const initialPosition = {
 };
 const client = new Client({});
 
-const Map = ({ navigation }) => {
-  const [uniLocation, setUniLocation] = useState({
-    latitude: 6.795127600000001,
-    longitude: 79.90086699999999,
-  });
+const Map = ({ navigation, route }) => {
+  const { placeInfo, selectedPlaceCoord, selectedPlaceName } = route.params;
+
+  const [selectedLocation, setSelectedLocation] = useState({});
+  const [selectedUniName, setSelectedUniName] = useState("");
   const [distance, setDistance] = useState({});
-  const [markers, setMarkers] = useState([
-    {
-      title: "Place 2",
-      latitude: 6.836652,
-      longitude: 79.86734,
-    },
-    {
-      title: "Place 1",
-      latitude: 6.795938,
-      longitude: 79.897311,
-    },
-  ]);
+  const [markers, setMarkers] = useState([]);
+  const [selectedMarker, setSelectedMarker] = useState({});
+  const [isChoose, setIsChoose] = useState(false);
+
   const mapRef = useRef("");
 
+  // console.log("route.params", route.params);
   useEffect(() => {
-    uniLocation.hasOwnProperty("latitude") &&
+    console.log("Use effect", selectedPlaceName);
+    setIsChoose(false);
+    setMarkers(placeInfo);
+    const camera = mapRef.current?.fitToCoordinates([
+      ...placeInfo,
+      selectedPlaceCoord,
+    ]);
+    mapRef.current?.animateCamera(camera, { duration: 1000 });
+
+    // moveTo(placeIfo);
+    selectedPlaceCoord.hasOwnProperty("latitude") &&
       client
         .distancematrix({
           params: {
             key: "AIzaSyC7UEErM9uNLXfGOviKE5FOymLpMNcvpyI",
-            origins: [uniLocation],
-            destinations: [markers[0], markers[1]],
+            origins: [selectedPlaceCoord],
+            destinations: [...markers],
           },
         })
         .then((r) => {
           // console.log(distance.rows[0]);
-
           setDistance(r.data);
         })
         .catch((e) => {
-          console.log(e);
+          console.log("e", e);
         });
-  }, [uniLocation]);
+  }, [selectedPlaceCoord, placeInfo]);
 
   const moveTo = async (position) => {
     const camera = await mapRef.current?.getCamera();
@@ -80,14 +82,19 @@ const Map = ({ navigation }) => {
     }
   };
   const handlePlaceSelected = (details) => {
-    // fetch("");
     const position = {
       latitude: details?.geometry.location.lat || 0,
       longitude: details?.geometry.location.lng || 0,
     };
     // console.log("Dis==", position);
-    setUniLocation(position);
-    moveTo(position);
+    setIsChoose(true);
+    setSelectedLocation(position);
+    setSelectedUniName(details?.name);
+    const camera = mapRef.current?.fitToCoordinates([...placeInfo, position]);
+    mapRef.current?.animateCamera(camera, { duration: 1000 });
+
+    console.log("details?.name", details?.name);
+    // moveTo(position);
   };
   // console.log("================================", distance);
 
@@ -99,8 +106,9 @@ const Map = ({ navigation }) => {
         alignItems="center"
         justifyContent={"space-between"}
       >
-        <Text style={styles.head}>Current Location </Text>
-        <Text style={styles.currentLocation}>Moratuwa </Text>
+        <Text style={{ fontFamily: "Poppins-Regular", fontSize: 12 }}>
+          {isChoose ? selectedUniName : selectedPlaceName}
+        </Text>
         <Pressable
           android_ripple={{ color: "#ccc", borderless: true, radius: 20 }}
           onPress={() => navigation.navigate("Browse")}
@@ -115,11 +123,12 @@ const Map = ({ navigation }) => {
           style={styles.map}
           provider={PROVIDER_GOOGLE}
           initialRegion={initialPosition}
+          mapPadding={{ top: 50, right: 50, bottom: 50, left: 50 }}
         >
-          {uniLocation.hasOwnProperty("latitude") && (
+          {isChoose ? (
             <Marker
-              coordinate={uniLocation}
-              key={uniLocation.latitude}
+              coordinate={selectedLocation}
+              key={selectedLocation.latitude}
               // title={marker.title}
               // description="desc"
               pinColor="#FD683D"
@@ -127,6 +136,19 @@ const Map = ({ navigation }) => {
               style={{ width: 5, height: 5 }}
               onPress={() => console.log("marker")}
             />
+          ) : (
+            selectedPlaceCoord.hasOwnProperty("latitude") && (
+              <Marker
+                coordinate={selectedPlaceCoord}
+                key={selectedPlaceCoord.latitude}
+                // title={marker.title}
+                // description="desc"
+                pinColor="#FD683D"
+                flat={true}
+                style={{ width: 5, height: 5 }}
+                onPress={() => console.log("marker")}
+              />
+            )
           )}
           {markers.map((marker, i) => {
             return marker.hasOwnProperty("latitude") ? (
@@ -145,24 +167,22 @@ const Map = ({ navigation }) => {
                 }
                 pinColor="#0000ff"
                 flat={true}
-                style={{ width: 5, height: 5 }}
-                icon={require("../assets/images/marker.png")}
-                onPress={() => console.log("marker")}
+                style={{ width: 2, height: 2 }}
+                icon={require("../assets/images/marker2.png")}
+                onPress={() => setSelectedMarker(marker)}
               />
             ) : null;
           })}
-          {markers.map((marker, i) => {
-            return (
-              <MapViewDirections
-                key={marker.latitude}
-                origin={marker}
-                destination={uniLocation}
-                apikey={"AIzaSyC7UEErM9uNLXfGOviKE5FOymLpMNcvpyI"}
-                strokeColor={"#FD683D"}
-                strokeWidth={3}
-              />
-            );
-          })}
+          {selectedMarker.hasOwnProperty("latitude") && (
+            <MapViewDirections
+              key={selectedMarker.latitude}
+              origin={selectedMarker}
+              destination={selectedPlaceCoord}
+              apikey={"AIzaSyC7UEErM9uNLXfGOviKE5FOymLpMNcvpyI"}
+              strokeColor={"#FD683D"}
+              strokeWidth={3}
+            />
+          )}
         </MapView>
         <Box style={styles.searchContainer}>
           <AutoComplete

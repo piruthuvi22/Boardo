@@ -23,15 +23,14 @@ const Home = () => {
         setErrorMsg("Permission to access location was denied");
         return;
       }
-
-      let location = await Location.getCurrentPositionAsync({});
+      let coordinate = await Location.getCurrentPositionAsync({});
       setLocation({
-        latitude: location?.coords.latitude,
-        longitude: location?.coords.longitude,
+        latitude: coordinate?.coords.latitude,
+        longitude: coordinate?.coords.longitude,
       });
       let lantlong = {
-        latitude: location?.coords.latitude,
-        longitude: location?.coords.longitude,
+        latitude: coordinate?.coords.latitude,
+        longitude: coordinate?.coords.longitude,
       };
       client
         .reverseGeocode({

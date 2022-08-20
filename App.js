@@ -34,7 +34,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import AuthContext from "./context";
 
 export default App = () => {
-  const [isUser, setIsUser] = useState(false);
+  const [isUser, setIsUser] = useState(true);
 
   const [state, dispatch] = React.useReducer(
     (prevState, action) => {
@@ -130,7 +130,7 @@ export default App = () => {
               {state.userToken ? (
                 <Tab.Navigator
                   screenOptions={{ tabBarHideOnKeyboard: true }}
-                  initialRouteName="Home"
+                  initialRouteName="Browse"
                 >
                   <Tab.Screen
                     name="Home"
