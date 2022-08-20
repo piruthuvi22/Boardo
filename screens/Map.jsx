@@ -37,51 +37,46 @@ const Map = ({ navigation, route }) => {
   const [selectedLocation, setSelectedLocation] = useState({});
   const [selectedUniName, setSelectedUniName] = useState("");
   const [distance, setDistance] = useState({});
-  const [markers, setMarkers] = useState([]);
   const [selectedMarker, setSelectedMarker] = useState({});
   const [isChoose, setIsChoose] = useState(false);
 
-  const mapRef = useRef("");
+  const mapRef = useRef(null);
 
-  // console.log("route.params", route.params);
-  useEffect(() => {
-    console.log("Use effect", selectedPlaceName);
-    setIsChoose(false);
-    setMarkers(placeInfo);
+  const zoomToFit = () => {
     const camera = mapRef.current?.fitToCoordinates([
       ...placeInfo,
       selectedPlaceCoord,
     ]);
     mapRef.current?.animateCamera(camera, { duration: 1000 });
+  };
 
-    // moveTo(placeIfo);
-    selectedPlaceCoord.hasOwnProperty("latitude") &&
-      client
-        .distancematrix({
-          params: {
-            key: "AIzaSyC7UEErM9uNLXfGOviKE5FOymLpMNcvpyI",
-            origins: [selectedPlaceCoord],
-            destinations: [...markers],
-          },
-        })
-        .then((r) => {
-          // console.log(distance.rows[0]);
-          setDistance(r.data);
-        })
-        .catch((e) => {
-          console.log("e", e);
-        });
+  useEffect(() => {
+    console.log("Use Effect");
+    setIsChoose(false);
+    zoomToFit();
+    (async () => {
+      // moveTo(placeIfo);
+      selectedPlaceCoord.hasOwnProperty("latitude") &&
+        (await client
+          .distancematrix({
+            params: {
+              key: "AIzaSyC7UEErM9uNLXfGOviKE5FOymLpMNcvpyI",
+              origins: [selectedPlaceCoord],
+              destinations: placeInfo,
+            },
+          })
+          .then((r) => {
+            setDistance(r.data);
+            // console.log("Distance setted");
+          })
+          .catch((e) => {
+            console.log("e", e);
+          }));
+    })();
   }, [selectedPlaceCoord, placeInfo]);
 
-  const moveTo = async (position) => {
-    const camera = await mapRef.current?.getCamera();
-    if (camera) {
-      camera.center = position;
-      camera.zoom = 15;
-      mapRef.current?.animateCamera(camera, { duration: 1000 });
-    }
-  };
-  const handlePlaceSelected = (details) => {
+  const handlePlaceSelected = async (details) => {
+    console.log("placeInfo", placeInfo);
     const position = {
       latitude: details?.geometry.location.lat || 0,
       longitude: details?.geometry.location.lng || 0,
@@ -90,11 +85,28 @@ const Map = ({ navigation, route }) => {
     setIsChoose(true);
     setSelectedLocation(position);
     setSelectedUniName(details?.name);
+
+    selectedLocation.hasOwnProperty("latitude") &&
+      (await client
+        .distancematrix({
+          params: {
+            key: "AIzaSyC7UEErM9uNLXfGOviKE5FOymLpMNcvpyI",
+            origins: [position],
+            destinations: placeInfo,
+          },
+        })
+        .then((r) => {
+          setDistance(r.data);
+          console.log("Distance setted2", r.data);
+        })
+        .catch((e) => {
+          console.log("e", e);
+        }));
+
     const camera = mapRef.current?.fitToCoordinates([...placeInfo, position]);
     mapRef.current?.animateCamera(camera, { duration: 1000 });
 
     console.log("details?.name", details?.name);
-    // moveTo(position);
   };
   // console.log("================================", distance);
 
@@ -122,10 +134,14 @@ const Map = ({ navigation, route }) => {
           ref={mapRef}
           style={styles.map}
           provider={PROVIDER_GOOGLE}
-          initialRegion={initialPosition}
+          // initialRegion={initialPosition}
+          // showsUserLocation={true}
+          showsMyLocationButton={true}
+          showsCompass={true}
+          loadingEnabled={true}
           mapPadding={{ top: 50, right: 50, bottom: 50, left: 50 }}
         >
-          {isChoose ? (
+          {isChoose && selectedLocation.hasOwnProperty("latitude") ? (
             <Marker
               coordinate={selectedLocation}
               key={selectedLocation.latitude}
@@ -150,7 +166,7 @@ const Map = ({ navigation, route }) => {
               />
             )
           )}
-          {markers.map((marker, i) => {
+          {placeInfo.map((marker, i) => {
             return marker.hasOwnProperty("latitude") ? (
               <Marker
                 coordinate={{
@@ -158,7 +174,7 @@ const Map = ({ navigation, route }) => {
                   longitude: marker.longitude,
                 }}
                 key={marker.latitude}
-                title={markers[i].title}
+                title={placeInfo[i].title}
                 description={
                   distance.hasOwnProperty("destination_addresses")
                     ? distance?.rows[0].elements[i].distance.text +
@@ -177,7 +193,7 @@ const Map = ({ navigation, route }) => {
             <MapViewDirections
               key={selectedMarker.latitude}
               origin={selectedMarker}
-              destination={selectedPlaceCoord}
+              destination={isChoose ? selectedLocation : selectedPlaceCoord}
               apikey={"AIzaSyC7UEErM9uNLXfGOviKE5FOymLpMNcvpyI"}
               strokeColor={"#FD683D"}
               strokeWidth={3}
