@@ -46,7 +46,7 @@ const RenterLogin = ({ navigation }) => {
   const handleRenterLogin = () => {
     let body = { username, password, role: "renter" };
     axios
-      .post("http://192.168.8.139:1000/users/login", body)
+      .post("https://boardo-api.herokuapp.com/users/login", body)
       .then((res) => console.log(res.data))
       .catch((err) => console.log("Err=", err));
   };

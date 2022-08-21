@@ -58,7 +58,7 @@ const RenterLogin = ({ navigation }) => {
     let body = { username, password, role: "student" };
     if (username != "" && password != "") {
       axios
-        .post("http://192.168.8.139:1000/users/login", body)
+        .post("https://boardo-api.herokuapp.com/users/login", body)
         .then((res) => {
           console.log(res.data);
           ShowToast(toast, "warning", "Login success!", () => {

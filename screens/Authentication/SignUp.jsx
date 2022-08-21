@@ -59,7 +59,7 @@ const RenterLogin = ({ navigation }) => {
     if (username != "" && password != "" && password2 != "") {
       if (password === password2) {
         axios
-          .post("http://192.168.8.139:1000/users/register", body)
+          .post("https://boardo-api.herokuapp.com/users/register", body)
           .then((res) => {
             console.log(res.data);
             showToast(toast, "warning", "Registration success", () =>

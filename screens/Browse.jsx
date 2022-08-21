@@ -76,7 +76,7 @@ const Map = ({ navigation }) => {
   useEffect(() => {
     console.log("Browse.jsx mounted");
     axios
-      .get("http://192.168.8.139:1000/places/get-places")
+      .get("https://boardo-api.herokuapp.com/places/get-places")
       .then((res) => {
         // console.log("res.data", res.data);
         setPlaces(res.data);
