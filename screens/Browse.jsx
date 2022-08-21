@@ -91,8 +91,8 @@ const Map = ({ navigation }) => {
       let placeInfo = [];
       places.map((place) => {
         placeInfo.push({
-          latitude: place.Coordinates.Latitude,
-          longitude: place.Coordinates.Longtitude,
+          latitude: Number(place.Coordinates.Latitude),
+          longitude: Number(place.Coordinates.Longtitude),
           title: place.PlaceTitle,
         });
       });
