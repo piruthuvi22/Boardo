@@ -34,8 +34,8 @@ import ShowToast from "../../components/core/toast";
 
 const RenterLogin = ({ navigation }) => {
   const [show, setShow] = useState(false);
-  const [username, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const [username, setEmail] = useState("piru");
+  const [password, setPassword] = useState("pass");
 
   const toast = useToast();
 

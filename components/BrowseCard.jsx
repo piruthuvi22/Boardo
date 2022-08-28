@@ -1,9 +1,11 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { TouchableOpacity, StyleSheet, Text } from "react-native";
 import { Box, HStack, Image, Row, Column, Badge, Pressable } from "native-base";
+import { Client } from "@googlemaps/google-maps-services-js";
 import Constants from "expo-constants";
 
 import { FontAwesome, MaterialIcons } from "@expo/vector-icons";
+const client = new Client({});
 
 const BrowseCard = ({
   navigation,
@@ -14,15 +16,69 @@ const BrowseCard = ({
   Payment,
   Coordinates,
   Facilities,
+  uniLocation,
+  Cost,
 }) => {
+  const [distTime, setDistTime] = useState([]);
+  useEffect(() => {
+    // console.log("Browser card.jsx",);
+    const calculateDistance = async () => {
+      await client
+        .distancematrix({
+          params: {
+            key: "AIzaSyC7UEErM9uNLXfGOviKE5FOymLpMNcvpyI",
+            origins: [uniLocation],
+            destinations: [
+              {
+                latitude: Coordinates.Latitude,
+                longitude: Coordinates.Longtitude,
+              },
+            ],
+          },
+        })
+        .then((r) => {
+          setDistTime([
+            r.data?.rows[0].elements[0].distance.text,
+            r.data?.rows[0].elements[0].duration.text,
+          ]);
+        })
+        .catch((e) => {
+          console.log("e", e);
+        });
+    };
+    calculateDistance();
+  }, [uniLocation]);
+
   return (
     <Box style={styles.card} w="full" my={1} borderRadius={3}>
-      <Pressable onPress={() => navigation.navigate("Details")}>
+      <Pressable
+        onPress={() =>
+          navigation.navigate("Details", {
+            PlaceTitle,
+            ImageUri,
+            Cost,
+            Rating,
+            Payment,
+            Facilities,
+            uniLocation,
+          })
+        }
+      >
         <Row>
           <Box h={150} w={"40%"} py={2}>
             <TouchableOpacity
               activeOpacity={0.7}
-              onPress={() => navigation.navigate("Details")}
+              onPress={() =>
+                navigation.navigate("Details", {
+                  PlaceTitle,
+                  ImageUri,
+                  Cost,
+                  Rating,
+                  Payment,
+                  Facilities,
+                  uniLocation,
+                })
+              }
             >
               <Image
                 source={{
@@ -38,9 +94,11 @@ const BrowseCard = ({
           <Row justifyContent={"space-between"} style={{ width: "60%" }} py={2}>
             <Column marginX={1}>
               <Text style={styles.title}>{PlaceTitle}</Text>
+              <Text style={styles.cost}>Rs.{Cost}</Text>
               <Text style={styles.desc}>{Facilities.RoomType}</Text>
-              <Text style={styles.desc}>{PlaceDescription}</Text>
-              <Text style={styles.km}>2.1Km 3-6min</Text>
+              <Text style={styles.km}>
+                {distTime.length > 0 ? [distTime[0], "  ", distTime[1]] : ""}
+              </Text>
               <HStack alignItems={"center"} justifyContent="space-between">
                 <Row alignItems={"center"}>
                   {Facilities.WashRoomType.includes("Attached") && (
@@ -90,10 +148,10 @@ const styles = StyleSheet.create({
     fontFamily: "Poppins-Bold",
     fontSize: 20,
   },
-  desc: {
-    fontFamily: "Poppins-Medium",
-    fontSize: 14,
-    color: "#666",
+  cost: {
+    fontFamily: "Poppins-Bold",
+    fontSize: 18,
+    color: "#223343",
   },
   km: {
     fontFamily: "Poppins-Regular",

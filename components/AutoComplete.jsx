@@ -1,5 +1,5 @@
 import { Input } from "native-base";
-import React from "react";
+import React, { useEffect } from "react";
 import { Text } from "react-native";
 import { GooglePlacesAutocomplete } from "react-native-google-places-autocomplete";
 
@@ -8,6 +8,10 @@ const AutoComplete = ({ label, placeholder, onPlaceSelected }) => {
     description: "country1",
     geometry: { location: { lat: 7.873592, lng: 80.773137 } },
   };
+  useEffect(() => {
+    console.log("AutoComplete.jsx");
+    return () => {};
+  }, []);
 
   return (
     <>

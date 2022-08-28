@@ -24,7 +24,17 @@ import { AntDesign, Ionicons } from "@expo/vector-icons";
 import Comment from "../components/Comment";
 // import ImageSlider from "react-native-image-slider";
 
-const Details = () => {
+const Details = ({ route }) => {
+  const {
+    PlaceTitle,
+    // ImageUri,
+    // Cost,
+    // Rating,
+    // Payment,
+    // Facilities,
+    // uniLocation,
+  } = route.params;
+
   const [images, setImages] = useState([
     "https://cdn.pixabay.com/photo/2014/02/27/16/10/flowers-276014__340.jpg",
     "https://images.pexels.com/photos/15286/pexels-photo.jpg?cs=srgb&dl=pexels-luis-del-r%C3%ADo-15286.jpg&fm=jpg",

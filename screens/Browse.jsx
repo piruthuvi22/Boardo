@@ -1,10 +1,11 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import {
   StyleSheet,
   Dimensions,
   DrawerLayoutAndroid,
   Text,
 } from "react-native";
+import { useFocusEffect } from "@react-navigation/native";
 import * as Location from "expo-location";
 import {
   Box,
@@ -23,6 +24,9 @@ import {
   Radio,
   Actionsheet,
   useDisclose,
+  Skeleton,
+  Spinner,
+  Flex,
 } from "native-base";
 import Constants from "expo-constants";
 import { Client } from "@googlemaps/google-maps-services-js";
@@ -31,13 +35,16 @@ import AutoComplete from "../components/AutoComplete";
 
 import { FontAwesome, Entypo } from "@expo/vector-icons";
 import axios from "axios";
+import Skelton from "../components/core/Skelton";
 const client = new Client({});
 
 const Map = ({ navigation }) => {
   const [uniName, setUniName] = useState("");
-  const [uniLocation, setUniLocation] = useState({});
+  const [uniLocation, setUniLocation] = useState({
+    latitude: null,
+    longitude: null,
+  });
   const [places, setPlaces] = useState([]);
-
   const { isOpen, onOpen, onClose } = useDisclose();
 
   useEffect(() => {
@@ -48,10 +55,7 @@ const Map = ({ navigation }) => {
         return;
       }
       let coordinate = await Location.getCurrentPositionAsync({});
-      setUniLocation({
-        latitude: coordinate?.coords.latitude,
-        longitude: coordinate?.coords.longitude,
-      });
+      setUniLocation(coordinate?.coords);
       let lantlong = {
         latitude: coordinate?.coords.latitude,
         longitude: coordinate?.coords.longitude,
@@ -64,7 +68,7 @@ const Map = ({ navigation }) => {
           },
         })
         .then((r) => {
-          console.log(r.data.results[0]?.formatted_address.split(",")[0]);
+          // console.log(r.data.results[0]?.formatted_address.split(",")[0]);
           setUniName(r.data?.results[0]?.formatted_address);
         })
         .catch((e) => {
@@ -74,17 +78,71 @@ const Map = ({ navigation }) => {
   }, []);
 
   useEffect(() => {
-    console.log("Browse.jsx mounted");
     axios
       .get("https://boardo-api.herokuapp.com/places/get-places")
       .then((res) => {
-        // console.log("res.data", res.data);
         setPlaces(res.data);
       })
       .catch((err) => {
         console.log(err);
       });
   }, []);
+
+  useFocusEffect(
+    useCallback(() => {
+      (async () => {
+        let { status } = await Location.requestForegroundPermissionsAsync();
+        if (status !== "granted") {
+          console.log("Permission to access location was denied");
+          return;
+        }
+        let coordinate = await Location.getCurrentPositionAsync({});
+        setUniLocation(coordinate?.coords);
+        let lantlong = {
+          latitude: coordinate?.coords.latitude,
+          longitude: coordinate?.coords.longitude,
+        };
+        client
+          .reverseGeocode({
+            params: {
+              key: "AIzaSyC7UEErM9uNLXfGOviKE5FOymLpMNcvpyI",
+              latlng: lantlong,
+            },
+          })
+          .then((r) => {
+            // console.log(r.data.results[0]?.formatted_address.split(",")[0]);
+            setUniName(r.data?.results[0]?.formatted_address);
+          })
+          .catch((e) => {
+            console.log(e);
+          });
+      })();
+      // Do something when the screen is focused
+      return () => {
+        // alert("Screen was unfocused");
+        // Do something when the screen is unfocused
+        // Useful for cleanup functions
+      };
+    }, [])
+  );
+
+  useFocusEffect(
+    useCallback(() => {
+      axios
+        .get("https://boardo-api.herokuapp.com/places/get-places")
+        .then((res) => {
+          setPlaces(res.data);
+        })
+        .catch((err) => {
+          console.log(err);
+        });
+      // Do something when the screen is focused
+      return () => {
+        // Do something when the screen is unfocused
+        // Useful for cleanup functions
+      };
+    }, [])
+  );
 
   const passToMaps = () => {
     if (places.length !== 0) {
@@ -105,6 +163,7 @@ const Map = ({ navigation }) => {
       });
     }
   };
+
   const handlePlaceSelected = (details) => {
     const position = {
       latitude: details?.geometry.location.lat || 0,
@@ -340,9 +399,42 @@ const Map = ({ navigation }) => {
   };
 
   const renderPlaceCard = () => {
-    return places.map((place) => (
-      <BrowseCard key={place._id} {...place} navigation={navigation} />
-    ));
+    // console.log("uniLocation", uniLocation.latitude);
+
+    if (uniLocation.latitude) {
+      return (
+        <ScrollView
+          showsVerticalScrollIndicator={false}
+          style={{ marginTop: 70 }}
+          mx={3}
+          // h={Dimensions.get("window").height}
+        >
+          {places.map((place) => (
+            <BrowseCard
+              key={place._id}
+              {...place}
+              uniLocation={uniLocation}
+              navigation={navigation}
+            />
+          ))}
+        </ScrollView>
+      );
+    } else {
+      return (
+        <Box
+          style={{ marginTop: 70 }}
+          mx={3}
+          h={Dimensions.get("screen").height}
+          backgroundColor={"white"}
+        >
+          <Skelton />
+          <Skelton />
+          <Skelton />
+          <Skelton />
+          <Skelton />
+        </Box>
+      );
+    }
   };
 
   return (
@@ -353,7 +445,13 @@ const Map = ({ navigation }) => {
         alignItems="center"
         justifyContent={"space-between"}
       >
-        <Text style={{ fontFamily: "Poppins-Regular", fontSize: 12 }}>
+        <Text
+          style={{
+            fontFamily: "Poppins-Medium",
+            fontSize: 13,
+            color: "#A0A0A0",
+          }}
+        >
           {uniName}
         </Text>
         <Pressable
@@ -372,13 +470,9 @@ const Map = ({ navigation }) => {
           />
         </Box>
       </Box>
-      <ScrollView
-        showsVerticalScrollIndicator={false}
-        style={{ marginTop: 70 }}
-        mx={3}
-      >
-        {renderPlaceCard()}
-      </ScrollView>
+
+      {renderPlaceCard()}
+
       <Box style={styles.fab}>
         <Fab
           renderInPortal={false}

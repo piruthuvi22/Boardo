@@ -17,6 +17,7 @@ const Home = () => {
   const [uniName, setUniName] = useState("");
 
   useEffect(() => {
+    console.log("Home.jsx mounted");
     (async () => {
       let { status } = await Location.requestForegroundPermissionsAsync();
       if (status !== "granted") {
@@ -59,7 +60,7 @@ const Home = () => {
   return (
     <Box style={styles.wrapper}>
       <HStack margin={3} alignItems="center">
-        <Text style={styles.head}>Current Location </Text>
+        {/* <Text style={styles.head}>Current Location </Text> */}
         <Text style={styles.currentLocation}>{uniName} </Text>
         {/* <Pressable android_ripple={{ color: "#ccc", borderless: true }}>
           <Feather name="chevron-down" size={24} color="#A0A0A0" />

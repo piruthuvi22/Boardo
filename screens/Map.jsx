@@ -51,7 +51,7 @@ const Map = ({ navigation, route }) => {
   };
 
   useEffect(() => {
-    console.log("Use Effect");
+    // console.log("Map.jsx mounted");
     setIsChoose(false);
     zoomToFit();
     (async () => {
@@ -76,7 +76,7 @@ const Map = ({ navigation, route }) => {
   }, [selectedPlaceCoord, placeInfo]);
 
   const handlePlaceSelected = async (details) => {
-    console.log("placeInfo", placeInfo);
+    // console.log("placeInfo", placeInfo);
     const position = {
       latitude: details?.geometry.location.lat || 0,
       longitude: details?.geometry.location.lng || 0,
@@ -105,8 +105,6 @@ const Map = ({ navigation, route }) => {
 
     const camera = mapRef.current?.fitToCoordinates([...placeInfo, position]);
     mapRef.current?.animateCamera(camera, { duration: 1000 });
-
-    console.log("details?.name", details?.name);
   };
   // console.log("================================", distance);
 
