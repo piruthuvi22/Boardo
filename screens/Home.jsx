@@ -8,55 +8,22 @@ import { Client } from "@googlemaps/google-maps-services-js";
 
 import { Feather } from "@expo/vector-icons";
 import RoomCard from "../components/RoomCard";
+import { findAddress, findLocation } from "../components/findLocation";
 
 const client = new Client({});
 
 const Home = () => {
   const [location, setLocation] = useState(null);
-  const [errorMsg, setErrorMsg] = useState(null);
   const [uniName, setUniName] = useState("");
 
   useEffect(() => {
     console.log("Home.jsx mounted");
-    (async () => {
-      let { status } = await Location.requestForegroundPermissionsAsync();
-      if (status !== "granted") {
-        setErrorMsg("Permission to access location was denied");
-        return;
-      }
-      let coordinate = await Location.getCurrentPositionAsync({});
-      setLocation({
-        latitude: coordinate?.coords.latitude,
-        longitude: coordinate?.coords.longitude,
-      });
-      let lantlong = {
-        latitude: coordinate?.coords.latitude,
-        longitude: coordinate?.coords.longitude,
-      };
-      client
-        .reverseGeocode({
-          params: {
-            key: "AIzaSyC7UEErM9uNLXfGOviKE5FOymLpMNcvpyI",
-            latlng: lantlong,
-          },
-        })
-        .then((r) => {
-          console.log(r.data.results[0]?.formatted_address.split(",")[0]);
-          setUniName(r.data?.results[0]?.formatted_address);
-        })
-        .catch((e) => {
-          console.log(e);
-        });
-    })();
+    findLocation().then((res) => {
+      // setLocation(res.lantlong);
+      findAddress(res.lantlong).then((res) => setUniName(res.uniName));
+    });
   }, []);
 
-  let text = "Waiting..";
-  if (errorMsg) {
-    text = errorMsg;
-  } else if (location) {
-    text = JSON.stringify(location);
-  }
-  // console.log("GPS = ", location);
   return (
     <Box style={styles.wrapper}>
       <HStack margin={3} alignItems="center">

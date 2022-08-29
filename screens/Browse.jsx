@@ -4,6 +4,7 @@ import {
   Dimensions,
   DrawerLayoutAndroid,
   Text,
+  RefreshControl,
 } from "react-native";
 import { useFocusEffect } from "@react-navigation/native";
 import * as Location from "expo-location";
@@ -36,9 +37,11 @@ import AutoComplete from "../components/AutoComplete";
 import { FontAwesome, Entypo } from "@expo/vector-icons";
 import axios from "axios";
 import Skelton from "../components/core/Skelton";
+import { findAddress, findLocation } from "../components/findLocation";
 const client = new Client({});
 
 const Map = ({ navigation }) => {
+  const [refreshing, setRefreshing] = React.useState(false);
   const [uniName, setUniName] = useState("");
   const [uniLocation, setUniLocation] = useState({
     latitude: null,
@@ -48,33 +51,16 @@ const Map = ({ navigation }) => {
   const { isOpen, onOpen, onClose } = useDisclose();
 
   useEffect(() => {
-    (async () => {
-      let { status } = await Location.requestForegroundPermissionsAsync();
-      if (status !== "granted") {
-        console.log("Permission to access location was denied");
-        return;
-      }
-      let coordinate = await Location.getCurrentPositionAsync({});
-      setUniLocation(coordinate?.coords);
-      let lantlong = {
-        latitude: coordinate?.coords.latitude,
-        longitude: coordinate?.coords.longitude,
-      };
-      client
-        .reverseGeocode({
-          params: {
-            key: "AIzaSyC7UEErM9uNLXfGOviKE5FOymLpMNcvpyI",
-            latlng: lantlong,
-          },
-        })
-        .then((r) => {
-          // console.log(r.data.results[0]?.formatted_address.split(",")[0]);
-          setUniName(r.data?.results[0]?.formatted_address);
-        })
-        .catch((e) => {
-          console.log(e);
-        });
-    })();
+    findLocation()
+      .then((res) => {
+        setUniLocation(res.lantlong);
+        findAddress(res.lantlong)
+          .then((res) => {
+            setUniName(res.uniName);
+          })
+          .catch((err) => console.log(err));
+      })
+      .catch((err) => console.log(err));
   }, []);
 
   useEffect(() => {
@@ -87,62 +73,6 @@ const Map = ({ navigation }) => {
         console.log(err);
       });
   }, []);
-
-  useFocusEffect(
-    useCallback(() => {
-      (async () => {
-        let { status } = await Location.requestForegroundPermissionsAsync();
-        if (status !== "granted") {
-          console.log("Permission to access location was denied");
-          return;
-        }
-        let coordinate = await Location.getCurrentPositionAsync({});
-        setUniLocation(coordinate?.coords);
-        let lantlong = {
-          latitude: coordinate?.coords.latitude,
-          longitude: coordinate?.coords.longitude,
-        };
-        client
-          .reverseGeocode({
-            params: {
-              key: "AIzaSyC7UEErM9uNLXfGOviKE5FOymLpMNcvpyI",
-              latlng: lantlong,
-            },
-          })
-          .then((r) => {
-            // console.log(r.data.results[0]?.formatted_address.split(",")[0]);
-            setUniName(r.data?.results[0]?.formatted_address);
-          })
-          .catch((e) => {
-            console.log(e);
-          });
-      })();
-      // Do something when the screen is focused
-      return () => {
-        // alert("Screen was unfocused");
-        // Do something when the screen is unfocused
-        // Useful for cleanup functions
-      };
-    }, [])
-  );
-
-  useFocusEffect(
-    useCallback(() => {
-      axios
-        .get("https://boardo-api.herokuapp.com/places/get-places")
-        .then((res) => {
-          setPlaces(res.data);
-        })
-        .catch((err) => {
-          console.log(err);
-        });
-      // Do something when the screen is focused
-      return () => {
-        // Do something when the screen is unfocused
-        // Useful for cleanup functions
-      };
-    }, [])
-  );
 
   const passToMaps = () => {
     if (places.length !== 0) {
@@ -398,16 +328,37 @@ const Map = ({ navigation }) => {
     );
   };
 
-  const renderPlaceCard = () => {
-    // console.log("uniLocation", uniLocation.latitude);
+  const onRefresh = useCallback(() => {
+    setRefreshing(true);
+    findLocation()
+      .then((res) => {
+        setUniLocation(res.lantlong);
+        findAddress(res.lantlong)
+          .then((res) => {
+            setUniName(res.uniName);
+            setRefreshing(false);
+            console.log("Refreshed");
+          })
+          .catch((err) => console.log(err));
+      })
+      .catch((err) => console.log(err));
+  }, []);
 
+  const renderPlaceCard = () => {
     if (uniLocation.latitude) {
       return (
         <ScrollView
           showsVerticalScrollIndicator={false}
           style={{ marginTop: 70 }}
           mx={3}
-          // h={Dimensions.get("window").height}
+          refreshControl={
+            <RefreshControl
+              refreshing={refreshing}
+              onRefresh={onRefresh}
+              colors={["#FF754E", "#fff"]}
+              progressBackgroundColor={"#223343"}
+            />
+          }
         >
           {places.map((place) => (
             <BrowseCard

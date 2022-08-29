@@ -9,7 +9,7 @@ const AutoComplete = ({ label, placeholder, onPlaceSelected }) => {
     geometry: { location: { lat: 7.873592, lng: 80.773137 } },
   };
   useEffect(() => {
-    console.log("AutoComplete.jsx");
+    // console.log("AutoComplete.jsx");
     return () => {};
   }, []);
 
