@@ -22,26 +22,44 @@ import {
 import { SliderBox } from "react-native-image-slider-box";
 import { AntDesign, Ionicons } from "@expo/vector-icons";
 import Comment from "../components/Comment";
+import FacilitiesActionSheet from "../components/Facilities";
+import axios from "axios";
 // import ImageSlider from "react-native-image-slider";
 
 const Details = ({ route }) => {
   const {
+    _id,
     PlaceTitle,
-    // ImageUri,
-    // Cost,
-    // Rating,
-    // Payment,
-    // Facilities,
-    // uniLocation,
+    Cost,
+    Rating,
+    Facilities,
+    uniLocation,
   } = route.params;
-
   const [images, setImages] = useState([
     "https://cdn.pixabay.com/photo/2014/02/27/16/10/flowers-276014__340.jpg",
     "https://images.pexels.com/photos/15286/pexels-photo.jpg?cs=srgb&dl=pexels-luis-del-r%C3%ADo-15286.jpg&fm=jpg",
     "https://upload.wikimedia.org/wikipedia/commons/3/36/Hopetoun_falls.jpg",
     "https://www.undp.org/sites/g/files/zskgke326/files/migration/cn/UNDP-CH-Why-Humanity-Must-Save-Nature-To-Save-Itself.jpeg",
   ]);
-  const { isOpen, onOpen, onClose } = useDisclose();
+
+  const {
+    isOpen: isOpenComm,
+    onOpen: onOpenComm,
+    onClose: onCloseComm,
+  } = useDisclose();
+  const {
+    isOpen: isOpenFaci,
+    onOpen: onOpenFaci,
+    onClose: onCloseFaci,
+  } = useDisclose();
+
+  const handleSave = () => {
+    // console.log("handleSave", _id);
+    axios
+      .post("http://192.168.8.139:1000/wish-list/add-to-wish", { id: _id })
+      .then((res) => console.log(res.data))
+      .catch((err) => console.log(err));
+  };  
   return (
     <Box h={"full"}>
       <HStack
@@ -51,17 +69,18 @@ const Details = ({ route }) => {
         alignItems={"center"}
       >
         <VStack>
-          <Text style={styles.title}>Place 1</Text>
-          <Text style={styles.location}>Katubedda</Text>
+          <Text style={styles.title}>{PlaceTitle}</Text>
+          <Text style={styles.location}>{_id}</Text>
         </VStack>
         <AirbnbRating
           showRating={false}
           count={5}
-          defaultRating={3}
+          defaultRating={Rating}
+          isDisabled
           size={18}
           selectedColor={"#F24E1E"}
           ratingBackgroundColor="blue"
-          onFinishRating={(r) => console.log(r)}
+          // onFinishRating={handleRating}
         />
       </HStack>
       {/* <VStack px={3}>
@@ -84,11 +103,11 @@ const Details = ({ route }) => {
       </Box>
       <HStack justifyContent={"space-between"} alignItems="baseline" px={3}>
         <HStack alignItems="baseline">
-          <Text style={styles.money}>Rs. 5,000/</Text>
+          <Text style={styles.money}>Rs. {Cost}/</Text>
           <Text style={styles.month}>Month</Text>
         </HStack>
-        <HStack alignItems="center" w={"1/4"} justifyContent="space-evenly">
-          <Pressable
+        <HStack alignItems="center" justifyContent="space-evenly">
+          {/* <Pressable
             android_ripple={{
               color: "#F24E1E22",
               borderless: true,
@@ -97,7 +116,7 @@ const Details = ({ route }) => {
             }}
           >
             <AntDesign name="sharealt" size={25} color="#F24E1E" />
-          </Pressable>
+          </Pressable> */}
           <Pressable
             android_ripple={{
               color: "#F24E1E22",
@@ -105,24 +124,63 @@ const Details = ({ route }) => {
               radius: 25,
               foreground: true,
             }}
+            onPress={handleSave}
           >
             <Ionicons name="bookmarks-outline" size={25} color="#F24E1E" />
           </Pressable>
         </HStack>
       </HStack>
       <Divider />
-      <HStack
-        style={styles.facilities}
-        my={2}
-        px={3}
-        alignItems="center"
-        justifyContent={"space-between"}
-      >
-        <Text style={styles.location}>Faclities</Text>
-        <AntDesign name="down" size={24} color="#777" />
-      </HStack>
+      <Pressable onPress={onOpenFaci}>
+        <HStack
+          style={styles.facilities}
+          my={2}
+          px={3}
+          alignItems="center"
+          justifyContent={"space-between"}
+        >
+          <Text style={styles.location}>Faclities</Text>
+          <AntDesign name="down" size={24} color="#777" />
+        </HStack>
+      </Pressable>
 
-      <Pressable onPress={onOpen}>
+      <Box px={2} py={2} mb={4}>
+        <HStack>
+          <Text style={styles.username}>Address : </Text>
+        </HStack>
+        <VStack>
+          <Text style={styles.username}>Facilities</Text>
+          <Box pl={2}>
+            {route.params?.Facilities?.Facilities?.map((faci, index) => (
+              <Text key={faci + index} style={styles.subtitle}>
+                {faci}
+              </Text>
+            ))}
+            <Text style={styles.subtitle}>
+              RoomType : {route.params?.Facilities?.RoomType}
+            </Text>
+            <Text style={styles.subtitle}>
+              No of Beds : {route.params?.Facilities?.NoOfBeds}
+            </Text>
+            <Text style={styles.subtitle}>
+              Wash room type :
+              {route.params?.Facilities?.WashRoomType?.map((was, index) => (
+                <Text key={was + index}>{was}, </Text>
+              ))}
+            </Text>
+
+            <Text style={styles.subtitle}>
+              Offering meals :{" "}
+              {route.params?.Facilities?.OfferingMeals ? "Yes" : "No"}
+            </Text>
+            <Text style={styles.subtitle}>
+              Payment : {route.params?.Facilities?.Payment}
+            </Text>
+          </Box>
+        </VStack>
+      </Box>
+
+      <Pressable onPress={onOpenComm}>
         <HStack
           style={styles.facilities}
           my={2}
@@ -136,18 +194,19 @@ const Details = ({ route }) => {
               isDisabled
               showRating={false}
               count={5}
-              defaultRating={3}
+              defaultRating={Rating}
               size={14}
               selectedColor={"#F24E1E"}
               ratingBackgroundColor="blue"
-              onFinishRating={(r) => console.log(r)}
+              // onFinishRating={(r) => console.log(r)}
             />
-            <Text style={styles.location}>4.6</Text>
+            <Text style={styles.location}>{Rating}</Text>
           </HStack>
         </HStack>
       </Pressable>
 
-      <Actionsheet isOpen={isOpen} onClose={onClose}>
+      {/* Comments actionsheet */}
+      <Actionsheet isOpen={isOpenComm} onClose={onCloseComm}>
         <Actionsheet.Content>
           <ScrollView
             showsVerticalScrollIndicator={false}
@@ -166,6 +225,19 @@ const Details = ({ route }) => {
           </ScrollView>
         </Actionsheet.Content>
       </Actionsheet>
+
+      {/* Facilities actionsheet */}
+      {/* <Actionsheet isOpen={isOpenFaci} onClose={onCloseFaci}>
+        <Actionsheet.Content>
+          <ScrollView
+            showsVerticalScrollIndicator={false}
+            StickyHeaderComponent={() => <Text>Hello</Text>}
+            style={{ width: "100%" }}
+          >
+            <FacilitiesActionSheet info={route.params} />
+          </ScrollView>
+        </Actionsheet.Content>
+      </Actionsheet> */}
 
       <Box style={styles.bottomBar}>
         <HStack
@@ -261,6 +333,17 @@ const styles = StyleSheet.create({
     right: 0,
     height: 200,
     width: "100%",
+  },
+  username: {
+    fontFamily: "Poppins-Medium",
+    fontSize: 16,
+    color: "#F24E1E",
+  },
+
+  subtitle: {
+    fontFamily: "Poppins-SemiBold",
+    fontSize: 16,
+    color: "#666",
   },
 });
 export default Details;

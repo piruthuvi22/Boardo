@@ -38,6 +38,7 @@ import { FontAwesome, Entypo } from "@expo/vector-icons";
 import axios from "axios";
 import Skelton from "../components/core/Skelton";
 import { findAddress, findLocation } from "../components/findLocation";
+import BrowserSkelton from "../components/core/SkeltonBrowser";
 const client = new Client({});
 
 const Map = ({ navigation }) => {
@@ -337,7 +338,6 @@ const Map = ({ navigation }) => {
           .then((res) => {
             setUniName(res.uniName);
             setRefreshing(false);
-            console.log("Refreshed");
           })
           .catch((err) => console.log(err));
       })
@@ -345,105 +345,94 @@ const Map = ({ navigation }) => {
   }, []);
 
   const renderPlaceCard = () => {
-    if (uniLocation.latitude) {
-      return (
-        <ScrollView
-          showsVerticalScrollIndicator={false}
-          style={{ marginTop: 70 }}
-          mx={3}
-          refreshControl={
-            <RefreshControl
-              refreshing={refreshing}
-              onRefresh={onRefresh}
-              colors={["#FF754E", "#fff"]}
-              progressBackgroundColor={"#223343"}
-            />
-          }
-        >
-          {places.map((place) => (
-            <BrowseCard
-              key={place._id}
-              {...place}
-              uniLocation={uniLocation}
-              navigation={navigation}
-            />
-          ))}
-        </ScrollView>
-      );
-    } else {
-      return (
-        <Box
-          style={{ marginTop: 70 }}
-          mx={3}
-          h={Dimensions.get("screen").height}
-          backgroundColor={"white"}
-        >
-          <Skelton />
-          <Skelton />
-          <Skelton />
-          <Skelton />
-          <Skelton />
-        </Box>
-      );
-    }
+    return (
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        style={{ marginTop: 70 }}
+        mx={3}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            colors={["#FF754E", "#fff"]}
+            progressBackgroundColor={"#223343"}
+          />
+        }
+      >
+        {places.map((place) => (
+          <BrowseCard
+            key={place._id}
+            {...place}
+            uniLocation={uniLocation}
+            navigation={navigation}
+          />
+        ))}
+      </ScrollView>
+    );
   };
 
   return (
     <Box style={styles.wrapper}>
-      <HStack
-        marginX={3}
-        marginTop={3}
-        alignItems="center"
-        justifyContent={"space-between"}
-      >
-        <Text
-          style={{
-            fontFamily: "Poppins-Medium",
-            fontSize: 13,
-            color: "#A0A0A0",
-          }}
-        >
-          {uniName}
-        </Text>
-        <Pressable
-          android_ripple={{ color: "#ccc", borderless: true, radius: 30 }}
-          onPress={onOpen}
-        >
-          <FontAwesome name="bars" size={24} color="#A0A0A0" />
-        </Pressable>
-      </HStack>
-
-      <Box mx={2}>
-        <Box style={styles.searchContainer}>
-          <AutoComplete
-            label={"University"}
-            onPlaceSelected={(details) => handlePlaceSelected(details)}
-          />
-        </Box>
-      </Box>
-
-      {renderPlaceCard()}
-
-      <Box style={styles.fab}>
-        <Fab
-          renderInPortal={false}
-          onPress={passToMaps}
-          style={styles.fabBtn}
-          shadow={3}
-          placement="bottom-right"
-          icon={<Icon color="#FF754E" as={Entypo} name="location" size="19" />}
-        />
-      </Box>
-      <Actionsheet isOpen={isOpen} onClose={onClose}>
-        <Actionsheet.Content bgColor={"rgba(34, 51, 67,0.95)"}>
-          <ScrollView
-            showsVerticalScrollIndicator={false}
-            style={{ width: "100%" }}
+      {uniLocation.latitude ? (
+        <>
+          <HStack
+            marginX={3}
+            marginTop={3}
+            alignItems="center"
+            justifyContent={"space-between"}
           >
-            {filterSheet()}
-          </ScrollView>
-        </Actionsheet.Content>
-      </Actionsheet>
+            <Text
+              style={{
+                fontFamily: "Poppins-Medium",
+                fontSize: 13,
+                color: "#A0A0A0",
+              }}
+            >
+              {uniName}
+            </Text>
+            <Pressable
+              android_ripple={{ color: "#ccc", borderless: true, radius: 30 }}
+              onPress={onOpen}
+            >
+              <FontAwesome name="bars" size={24} color="#A0A0A0" />
+            </Pressable>
+          </HStack>
+          <Box mx={2}>
+            <Box style={styles.searchContainer}>
+              <AutoComplete
+                label={"University"}
+                onPlaceSelected={(details) => handlePlaceSelected(details)}
+              />
+            </Box>
+          </Box>
+          {renderPlaceCard()}
+          <Box style={styles.fab}>
+            <Fab
+              renderInPortal={false}
+              onPress={passToMaps}
+              style={styles.fabBtn}
+              shadow={3}
+              placement="bottom-right"
+              icon={
+                <Icon color="#FF754E" as={Entypo} name="location" size="19" />
+              }
+            />
+          </Box>
+
+          <Actionsheet isOpen={isOpen} onClose={onClose}>
+            <Actionsheet.Content bgColor={"rgba(34, 51, 67,0.95)"}>
+              <ScrollView
+                showsVerticalScrollIndicator={false}
+                style={{ width: "100%" }}
+              >
+                {filterSheet()}
+              </ScrollView>
+            </Actionsheet.Content>
+          </Actionsheet>
+        </>
+      ) : (
+        <BrowserSkelton />
+      )}
     </Box>
   );
 };

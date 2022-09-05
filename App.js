@@ -127,7 +127,8 @@ export default App = () => {
           <SafeAreaProvider>
             <StatusBar networkActivityIndicatorVisible={false} />
             <NavigationContainer>
-              {state.userToken ? (
+              {/* {state.userToken ? ( */}
+              {true ? (
                 <Tab.Navigator
                   screenOptions={{ tabBarHideOnKeyboard: true }}
                   initialRouteName="Browse"
@@ -220,6 +221,7 @@ export default App = () => {
                       headerLeft: () => {
                         return (
                           <Ionicons
+                            style={{ paddingLeft: 5 }}
                             name="chevron-back-outline"
                             size={24}
                             color="#fff"

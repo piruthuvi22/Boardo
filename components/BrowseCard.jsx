@@ -12,12 +12,11 @@ const BrowseCard = ({
   Rating,
   PlaceTitle,
   PlaceDescription,
-  ImageUri,
-  Payment,
-  Coordinates,
   Facilities,
-  uniLocation,
   Cost,
+  Coordinates,
+  uniLocation,
+  _id,
 }) => {
   const [distTime, setDistTime] = useState([]);
   useEffect(() => {
@@ -54,11 +53,10 @@ const BrowseCard = ({
       <Pressable
         onPress={() =>
           navigation.navigate("Details", {
+            _id,
             PlaceTitle,
-            ImageUri,
             Cost,
             Rating,
-            Payment,
             Facilities,
             uniLocation,
           })
@@ -70,11 +68,10 @@ const BrowseCard = ({
               activeOpacity={0.7}
               onPress={() =>
                 navigation.navigate("Details", {
+                  _id,
                   PlaceTitle,
-                  ImageUri,
                   Cost,
                   Rating,
-                  Payment,
                   Facilities,
                   uniLocation,
                 })

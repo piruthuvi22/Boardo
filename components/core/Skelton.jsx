@@ -2,7 +2,7 @@ import { Box, HStack, Skeleton } from "native-base";
 import React from "react";
 import { Dimensions } from "react-native";
 
-const Skelton = () => {
+const SkeltonCard = () => {
   return (
     <HStack
       w="100%"
@@ -24,4 +24,4 @@ const Skelton = () => {
   );
 };
 
-export default Skelton;
+export default SkeltonCard;
